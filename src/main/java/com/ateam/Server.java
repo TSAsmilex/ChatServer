@@ -5,7 +5,7 @@ import java.net.*;
 
 public class Server {
     public static void run(String[] args) throws Exception {
-            int            port         = 8722;
+            int            port         = 49080;
             Socket         socket       = null;
             BufferedReader reader       = null;  // Local reader from the client
             PrintStream    outputStream = null;  // Output stream to the client
