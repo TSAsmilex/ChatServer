@@ -15,6 +15,5 @@ public class App
         catch (Exception e) {
             System.out.println("Exception: " + e.getMessage());
         }
-        System.out.println( "Hello World!" );
     }
 }

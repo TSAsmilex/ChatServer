@@ -23,23 +23,28 @@ public class Server {
      */
     public void run() throws Exception {
         ss = new ServerSocket(PORT);
-        System.out.println("TCP Server is starting up, listening at port " + PORT + ".");
+        System.out.println("[Server] TCP Server is starting up, listening at port " + PORT + ".");
         newConnections = new ServerAccepClient(ss);
 
         Socket socket = null;
-        newConnections.run();
+        newConnections.start();
 
         while (true) {
+            Thread.sleep(1000);
             // Setup new connections
             if (newConnections.hasSocket()) {
+                System.out.println("[Server]\t New socket received. Added to list.");
                 socket = newConnections.getSocket();
                 ClientHandler client = new ClientHandler(socket);
                 clients.add(client);
                 client.start();
             }
 
+            System.out.println("[Server]\t Server running");
+
             for (var client: clients) {
                 if (client.checkPendingMessages()) {
+                    System.out.println("[Server]\t Pending messages to be sent");
                     broadcast(client.getMessages());
                 }
             }
@@ -51,6 +56,7 @@ public class Server {
      * @param messages queue of messages to be sent
      */
     private void broadcast(ArrayDeque<String> messages) throws IOException {
+        System.out.println("[Server]\t Broadcasting messages");
         while (!messages.isEmpty()) {
             var message = messages.pop();
 

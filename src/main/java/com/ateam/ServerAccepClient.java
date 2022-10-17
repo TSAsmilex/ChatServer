@@ -26,15 +26,13 @@ public class ServerAccepClient extends Thread {
      */
     @Override
     public void run() {
-        while (true) {
-            if (currentSocket == null) {
-                try {
-                    currentSocket = ss.accept();
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-
+        if (currentSocket == null) {
+            try {
+                System.out.println("[ServerAcceptClient]\tWaiting for new connections");
+                currentSocket = ss.accept();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
