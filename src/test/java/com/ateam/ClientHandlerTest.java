@@ -25,8 +25,8 @@ public class ClientHandlerTest {
     public void testAwaitMessage() throws Exception {
         // GIVEN
         System.out.println("awaitMessage");
+        Socket socket = null;
         ClientHandler instance = new ClientHandler(socket);
-        Socket mySocket;
 
         // THEN
         instance.awaitMessage();
@@ -42,10 +42,14 @@ public class ClientHandlerTest {
     public void testSendMessage() throws Exception {
         // GIVEN
         System.out.println("sendMessage");
-        ClientHandler instance = null;
+        Socket socket = null;
+        ClientHandler instance = new ClientHandler(socket);
 
         //THEN
+        instance.sendMessage("Hola mundo");
+
         // EXPECT
+        assertEquals("Hola mundo", instance.getMessages().getLast());
     }
 
     /**
@@ -57,10 +61,10 @@ public class ClientHandlerTest {
         System.out.println("checkPendingMessages");
         ClientHandler instance = null;
         boolean expResult = false;
-        
+
         //  THEN
         boolean result = instance.checkPendingMessages();
-        
+
         // EXPECT
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
