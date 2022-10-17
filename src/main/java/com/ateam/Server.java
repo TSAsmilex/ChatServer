@@ -2,6 +2,7 @@ package com.ateam;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.logging.Handler;
 
@@ -21,20 +22,16 @@ public class Server {
         newConnections = new ServerAccepClient(ss);
 
         Socket socket = null;
+        newConnections.run();
 
         while (true) {
             // Setup new connections
-
             if (newConnections.hasSocket()) {
                 socket = newConnections.getSocket();
                 ClientHandler client = new ClientHandler(socket);
                 clients.add(client);
-                //client.start();
+                client.start();
             }
-
-            clients.add(new ClientHandler(socket));
-
-            // Check if any client has sent a message
 
             for (var client: clients) {
                 if (client.pendingMessage()) {
@@ -48,9 +45,14 @@ public class Server {
      * Send a message to all clients
      * @param messages queue of messages to be sent
      */
-    private void broadcast(ArrayList<String> messages) {
-        for (var client: clients) {
-            client.sendMessages(messages);
+    private void broadcast(ArrayDeque<String> messages) {
+        while (!messages.isEmpty()) {
+            var message = messages.pop();
+
+            for (var client: clients) {
+                client.sendMessage(message);
+            }
+
         }
     }
 }
