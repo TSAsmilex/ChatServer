@@ -25,7 +25,7 @@ public class ClientHandlerTest {
     public void testAwaitMessage() throws Exception {
         // GIVEN
         System.out.println("awaitMessage");
-        ClientHandler instance = null;
+        ClientHandler instance = new ClientHandler(socket);
         Socket mySocket;
 
         // THEN

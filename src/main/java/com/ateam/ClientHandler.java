@@ -27,6 +27,7 @@ public class ClientHandler extends Thread {
      * @param socket
      */
     public ClientHandler(Socket socket) throws IOException {
+        super();
         this.socket = socket;
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         writer = new PrintStream(socket.getOutputStream());
