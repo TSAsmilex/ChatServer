@@ -2,13 +2,9 @@ package com.ateam;
 
 import java.io.*;
 import java.net.*;
-<<<<<<< HEAD
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.logging.Handler;
-=======
-import java.util.ArrayList;
->>>>>>> 8a669ec (WIP)
 
 
 /*
@@ -22,7 +18,6 @@ public class Server {
 
     ServerAccepClient newConnections;
     ServerSocket ss;
-
 
     /**
      * Entrypoint of the server.
