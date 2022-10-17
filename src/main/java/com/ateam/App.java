@@ -1,5 +1,6 @@
 package com.ateam;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -8,7 +9,7 @@ import java.util.logging.Logger;
  */
 public class App
 {
-    private static Logger LOGGER = Logger.getLogger("App");
+    private static final Logger LOGGER = Logger.getLogger("App");
     public static void main( String[] args )
     {
         
@@ -18,7 +19,7 @@ public class App
 
         }
         catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.toString(), e);
         }
         System.out.println( "Hello World!" );
     }
