@@ -5,7 +5,6 @@
 package com.ateam;
 
 import java.net.Socket;
-import java.util.ArrayDeque;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
