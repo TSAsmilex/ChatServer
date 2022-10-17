@@ -6,7 +6,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.logging.Handler;
 
-
 /*
  * This class is the server side of the application. It manages multiple connections, waiting for messages to arrive.
  * When one client has sent a new message, it broadcast it to all current clients.
