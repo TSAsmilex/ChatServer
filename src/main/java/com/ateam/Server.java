@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.logging.Handler;
 
 
+/*
+ * This class is the server side of the application. It manages multiple connections, waiting for messages to arrive.
+ * When one client has sent a new message, it broadcast it to all current clients.
+ */
 public class Server {
     final int PORT = 49080;
 
@@ -16,7 +20,11 @@ public class Server {
     ServerSocket ss;
 
 
-    public void run(String[] args) throws Exception {
+    /**
+     * Entrypoint of the server.
+     * @throws Exception
+     */
+    public void run() throws Exception {
         ss = new ServerSocket(PORT);
         System.out.println("TCP Server is starting up, listening at port " + PORT + ".");
         newConnections = new ServerAccepClient(ss);

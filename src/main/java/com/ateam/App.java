@@ -10,7 +10,7 @@ public class App
     {
         var server = new Server();
         try {
-            server.run(args);
+            server.run();
         }
         catch (Exception e) {
             System.out.println("Exception: " + e.getMessage());
