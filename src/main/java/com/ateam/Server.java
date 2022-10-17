@@ -2,31 +2,26 @@ package com.ateam;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 
 public class Server {
-    public static void run(String[] args) throws Exception {
-            int            port         = 49080;
-            Socket         socket       = null;
-            BufferedReader reader       = null;  // Local reader from the client
-            PrintStream    outputStream = null;  // Output stream to the client
+    final int PORT = 49080;
 
-            String       clientRequest    = "";
-            String       responseToClient = "";
-            ServerSocket ss               = new ServerSocket(port);
-            System.out.println("TCP Server is starting up, listening at port " + port + ".");
+    private ArrayList<Socket> clients = new ArrayList<Socket>();
+
+    ServerSocket ss ;
+
+
+    public void run(String[] args) throws Exception {
+            Socket         socket       = null;
+
+            System.out.println("TCP Server is starting up, listening at port " + PORT + ".");
 
             while (true) {
                 // Get request from client
                 socket        = ss.accept();
-                reader        = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                clientRequest = reader.readLine();
-                System.out.println("[TCPServer] Get request [" + clientRequest + "] from Client.");
 
-                // Send response to client
-                outputStream     = new PrintStream(socket.getOutputStream());
-                responseToClient = clientRequest.toUpperCase();
-                outputStream.println(responseToClient);
-                System.out.println("[TCPServer] Send out response [" + responseToClient + "] to Client.");
+
             }
     }
 }
