@@ -14,9 +14,8 @@ public class Server {
     final int PORT = 49080;
 
     private ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();
-
     ServerAccepClient newConnections;
-    ServerSocket ss;
+    ServerSocket ss ;
 
     /**
      * Entrypoint of the server.
@@ -40,7 +39,7 @@ public class Server {
             }
 
             for (var client: clients) {
-                if (client.pendingMessage()) {
+                if (client.checkPendingMessages()) {
                     broadcast(client.getMessages());
                 }
             }
@@ -51,7 +50,7 @@ public class Server {
      * Send a message to all clients
      * @param messages queue of messages to be sent
      */
-    private void broadcast(ArrayDeque<String> messages) {
+    private void broadcast(ArrayDeque<String> messages) throws IOException {
         while (!messages.isEmpty()) {
             var message = messages.pop();
 
