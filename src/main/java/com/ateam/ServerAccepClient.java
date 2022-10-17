@@ -8,6 +8,7 @@ public class ServerAccepClient extends Thread {
     private ServerSocket ss = null;
 
     ServerAccepClient (ServerSocket ss) {
+        super();
         this.ss = ss;
     }
 
