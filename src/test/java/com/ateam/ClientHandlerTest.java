@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
  * @author pferna12
  */
 public class ClientHandlerTest {
-    
+
     public ClientHandlerTest() {
     }
 
@@ -27,11 +27,10 @@ public class ClientHandlerTest {
         System.out.println("awaitMessage");
         ClientHandler instance = null;
         Socket mySocket;
-        
+
         // THEN
         instance.awaitMessage();
-        
-        
+
         // EXPECT
         assertEquals(instance, this);
     }
@@ -44,24 +43,9 @@ public class ClientHandlerTest {
         // GIVEN
         System.out.println("sendMessage");
         ClientHandler instance = null;
-        
-        //THEN
-        
-        // EXPECT
-    }
 
-    /**
-     * Test of getMessages method, of class ClientHandler.
-     */
-    @Test
-    public void testGetMessages() {
-        System.out.println("getMessages");
-        ClientHandler instance = null;
-        ArrayDeque<String> expResult = null;
-        ArrayDeque<String> result = instance.getMessages();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        //THEN
+        // EXPECT
     }
 
     /**
@@ -69,13 +53,18 @@ public class ClientHandlerTest {
      */
     @Test
     public void testCheckPendingMessages() {
+        // GIVEN
         System.out.println("checkPendingMessages");
         ClientHandler instance = null;
         boolean expResult = false;
+        
+        //  THEN
         boolean result = instance.checkPendingMessages();
+        
+        // EXPECT
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
-    
+
 }

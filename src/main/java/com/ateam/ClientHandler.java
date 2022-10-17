@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayDeque;
 
@@ -39,7 +38,9 @@ public class ClientHandler extends Thread {
      */
     public ArrayDeque<String> getMessages() {
         ArrayDeque<String> newQueue = new ArrayDeque<>();
-
+        for(String msg : messages){
+            newQueue.add(msg);
+        }
         messages.clear();
         return newQueue;
     }
