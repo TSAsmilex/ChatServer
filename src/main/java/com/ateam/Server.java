@@ -6,10 +6,17 @@ import java.net.*;
 public class Server {
 
     public static void run(String[] args) throws Exception {
+<<<<<<< HEAD
         int port = 8722;
         Socket socket = null;
         BufferedReader reader = null;  // Local reader from the client
         PrintStream outputStream = null;  // Output stream to the client
+=======
+            int            port         = 49080;
+            Socket         socket       = null;
+            BufferedReader reader       = null;  // Local reader from the client
+            PrintStream    outputStream = null;  // Output stream to the client
+>>>>>>> 428699b1b79eafa85eb66a508d1b55561f7d5614
 
         String clientRequest = "";
         String responseToClient = "";
