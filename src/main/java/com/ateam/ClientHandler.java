@@ -33,10 +33,7 @@ public class ClientHandler extends Thread {
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         writer = new PrintStream(socket.getOutputStream());
     }
-
-    public ClientHandler() {
-    }
-    
+   
 
     /**
      *
