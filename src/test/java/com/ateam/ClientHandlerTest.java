@@ -5,6 +5,7 @@
 package com.ateam;
 
 import java.net.Socket;
+import java.util.ArrayDeque;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -66,6 +67,58 @@ public class ClientHandlerTest {
         
         // EXPECT
         assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of getMessages method, of class ClientHandler.
+     */
+    @Test
+    public void testGetMessages() {
+        System.out.println("getMessages");
+        ClientHandler instance = null;
+        ArrayDeque<String> expResult = null;
+        ArrayDeque<String> result = instance.getMessages();
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of run method, of class ClientHandler.
+     */
+    @Test
+    public void testRun() {
+        System.out.println("run");
+        ClientHandler instance = null;
+        instance.run();
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of isConnected method, of class ClientHandler.
+     */
+    @Test
+    public void testIsConnected() {
+        System.out.println("isConnected");
+        ClientHandler instance = null;
+        boolean expResult = false;
+        boolean result = instance.isConnected();
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of close method, of class ClientHandler.
+     */
+    @Test
+    public void testClose() throws Exception {
+        System.out.println("close");
+        ClientHandler instance = null;
+        instance.close();
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
