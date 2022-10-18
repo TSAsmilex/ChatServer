@@ -85,7 +85,7 @@ public class Server {
      * @param messages queue of messages to be sent
      */
     // Broadcast should use the client instead of the messages
-    public void broadcast(ClientHandler client) throws IOException {
+    public void broadcast(ClientHandler client) throws ClientHandlerException {
         LOGGER.info("[Server]\t Broadcasting messages");
         var messages = client.getMessages();
 
