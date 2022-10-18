@@ -10,6 +10,11 @@ import java.util.logging.Logger;
 public class App
 {
     private static final Logger LOGGER = Logger.getLogger("App");
+
+    /**
+     *
+     * @param args
+     */
     public static void main( String[] args )
     {
         var server = new Server();

@@ -10,14 +10,17 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayDeque;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
- * @author pferna12
  */
 public class ClientHandler extends Thread {
+
     ArrayDeque<String> messages = new ArrayDeque<>();
     String lastMessage = new String();
+    private static final Logger LOGGER = Logger.getLogger("ClientHandler");
 
     Socket socket;
     BufferedReader reader;
@@ -36,54 +39,73 @@ public class ClientHandler extends Thread {
 
     Thread awaitMessageThread = new Thread(awaitMessage, "Await message");
 
-
     /**
      *
      * @param socket
-     * @throws java.io.IOException
+     * @throws com.ateam.ClientHandlerException
      */
-    public ClientHandler(Socket socket) throws IOException {
+    public ClientHandler(Socket socket) throws ClientHandlerException {
         super();
-
         System.out.println("[ClientHandler] New socket detected with IP " + socket.getInetAddress() + ". Creating ClientHandler");
-
         this.socket = socket;
-        reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        writer = new PrintStream(socket.getOutputStream());
+
+        try {
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "BufferedReader failed", e);
+            throw new ClientHandlerException("Failure in ClientHandler. Cannot build object.");
+        }
+
+        try {
+            writer = new PrintStream(socket.getOutputStream());
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "PrintStream failed", e);
+            throw new ClientHandlerException("Cannot build object. Failure in ClientHandler.");
+        }
+
     }
 
-
     /**
-     *
-     * @return
+     * Get messages in newQueue
+     * @return a new cleaned ArrayDeque
      */
     public ArrayDeque<String> getMessages() {
         ArrayDeque<String> newQueue = new ArrayDeque<>();
-        for(String msg : messages){
+        for (String msg : messages) {
             newQueue.add(msg);
         }
         messages.clear();
         return newQueue;
     }
 
-
     /**
      *
      * @param message
-     * @throws IOException
+     * @throws com.ateam.ClientHandlerException
      *
      */
-    public void sendMessage(String message) throws IOException {
-        // Send response to client
-        writer.println(message);
+    public void sendMessage(String message) throws ClientHandlerException {
+        try {
+            // Send response to client
+            writer.println(message);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "PrintStream failed", e);
+            throw new ClientHandlerException("Failure in ClientHandler. Check PrintStream.");
+        }
+
     }
 
-
+    /**
+     *
+     * @return
+     */
     public boolean checkPendingMessages() {
-        return this.messages.size() > 0;
+        return !this.messages.isEmpty();
     }
 
-
+    /**
+     *
+     */
     @Override
     public void run() {
         while (true) {
@@ -92,36 +114,38 @@ public class ClientHandler extends Thread {
                 if (!awaitMessageThread.isAlive()) {
                     awaitMessageThread.start();
                 }
-            }
-            // New message received. Save it to the queue and clean it.
+            } // New message received. Save it to the queue and clean it.
             else {
                 awaitMessageThread = new Thread(awaitMessage, "Await message");
                 messages.add(new String(lastMessage));
                 lastMessage = new String();
             }
 
-
             try {
                 Thread.sleep(200);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Run failed", e);
             }
         }
     }
 
-
+    /**
+     *
+     * @return
+     */
     public boolean isConnected() {
         return socket.isConnected();
     }
 
-
-    public void close() {
+    /**
+     *
+     * @throws ClientHandlerException
+     */
+    public void close() throws ClientHandlerException {
         try {
             socket.close();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error closing thread.", e);
         }
     }
 }

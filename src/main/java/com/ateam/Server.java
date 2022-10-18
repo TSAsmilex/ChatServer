@@ -2,14 +2,18 @@ package com.ateam;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.logging.Handler;
 
 /*
  * This class is the server side of the application. It manages multiple connections, waiting for messages to arrive.
  * When one client has sent a new message, it broadcast it to all current clients.
  */
+
+/**
+ *
+ * @author pferna12
+ */
+
 public class Server {
     final int PORT = 49080;
 
@@ -78,7 +82,7 @@ public class Server {
      * @param messages queue of messages to be sent
      */
     // Broadcast should use the client instead of the messages
-    private void broadcast(ClientHandler client) throws IOException {
+    private void broadcast(ClientHandler client) throws ClientHandlerException {
         System.out.println("[Server]\t Broadcasting messages");
         var messages = client.getMessages();
 
