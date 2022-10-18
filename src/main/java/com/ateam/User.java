@@ -1,11 +1,9 @@
 package com.ateam;
 
-import java.util.ArrayList;
-
 /**
- * This class contains the attributes and methods of an User.
+ * A simple class representing a user with a username and a hashed password.
  *
- * @author
+ * @author tsasmilex
  * @version 1.0
  */
 public class User {
@@ -22,11 +20,7 @@ public class User {
         return username;
     }
 
-    /**
-     * getHashedPassword
-     *
-     * @return hashedPassword
-     */
+
     public String getHashedPassword() {
         return hashedPassword;
     }
