@@ -1,19 +1,25 @@
 package com.ateam;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Hello world!
  *
  */
 public class App
 {
+    private static final Logger LOGGER = Logger.getLogger("App");
     public static void main( String[] args )
     {
         var server = new Server();
+        LOGGER.info("Hola mundo");
+
         try {
             server.run();
         }
         catch (Exception e) {
-            System.out.println("Exception: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, e.toString(), e);
         }
     }
 }
