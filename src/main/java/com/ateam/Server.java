@@ -3,6 +3,8 @@ package com.ateam;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*
  * This class is the server side of the application. It manages multiple connections, waiting for messages to arrive.
@@ -15,6 +17,7 @@ import java.util.ArrayList;
  */
 
 public class Server {
+    private static final Logger LOGGER = Logger.getLogger("Waiting for new connections");
     final int PORT = 49080;
 
     private ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();
@@ -23,22 +26,30 @@ public class Server {
 
     Runnable awaitNewConnections = () -> {
         try {
-            System.out.println("[Server]\tWaiting for new connections");
+            LOGGER.info("[Server]\tWaiting for new connections");
             socket = ss.accept();
         }
         catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "[Server] Error waiting for connections", e);
         }
     };
     Thread awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
+
+
+    public Server() {
+        try {
+            ss = new ServerSocket(PORT);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "[Server] Error creating server socket", e);
+        }
+    }
 
     /**
      * Entrypoint of the server.
      * @throws Exception
      */
     public void run() throws Exception {
-        ss = new ServerSocket(PORT);
-        System.out.println("[Server] TCP Server is starting up, listening at port " + PORT + ".");
+        LOGGER.info("[Server] TCP Server is starting up, listening at port " + PORT + ".");
 
         while (true) {
             // Setup new connections
@@ -49,25 +60,18 @@ public class Server {
             }
             else {
                 awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
-                ClientHandler client = new ClientHandler(socket);
-                socket = null;
-                clients.add(client);
-                client.start();
+                addNewClientHandler(socket);
             }
-
-
-            //System.out.println("[Server]\t Server running");
-
 
             for (var client: clients) {
                 if (!client.isConnected()) {
-                    System.out.println("[Server]\tClient disconnected. Removing from pool");
+                    LOGGER.info("[Server]\tClient disconnected. Removing from pool");
                     client.close();
                     clients.remove(client);
                 }
                 // No -> close connection
                 if (client.checkPendingMessages()) {
-                    System.out.println("[Server]\t Pending messages to be sent");
+                    LOGGER.info("[Server]\t Pending messages to be sent");
                     broadcast(client);
                 }
             }
@@ -82,20 +86,30 @@ public class Server {
      * @param messages queue of messages to be sent
      */
     // Broadcast should use the client instead of the messages
-    private void broadcast(ClientHandler client) throws ClientHandlerException {
-        System.out.println("[Server]\t Broadcasting messages");
+    public void broadcast(ClientHandler client) throws ClientHandlerException {
+        LOGGER.info("[Server]\t Broadcasting messages");
         var messages = client.getMessages();
 
         while (!messages.isEmpty()) {
             var message = messages.pop();
 
-            for (var otherClient: clients) {
-                if (otherClient != client) {
-                    System.out.println("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
-                    client.sendMessage(message);
-                }
-            }
+            var otherClients = clients.stream().filter(c -> c != client).toList();
 
+            for (var otherClient: otherClients) {
+                LOGGER.info("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
+                otherClient.sendMessage(message);
+            }
         }
+    }
+
+    public void addNewClientHandler(Socket socket) throws ClientHandlerException {
+        ClientHandler client = new ClientHandler(socket);
+        socket = null;
+        clients.add(client);
+        client.start();
+    }
+
+    public ArrayList<ClientHandler> getClients() {
+        return clients;
     }
 }

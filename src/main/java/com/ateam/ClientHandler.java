@@ -66,7 +66,13 @@ public class ClientHandler extends Thread {
         }
     }
 
+<<<<<<< HEAD
     public ClientHandler(Socket socket, BufferedReader reader, PrintWriter writer) {
+=======
+
+    public ClientHandler(Socket socket, BufferedReader reader, PrintStream writer) {
+        super();
+>>>>>>> master
         this.socket = socket;
         this.reader = reader;
         this.writer = writer;
@@ -78,6 +84,11 @@ public class ClientHandler extends Thread {
      * @return a new cleaned ArrayDeque
      */
     public ArrayDeque<String> getMessages() {
+        if (!lastMessage.isEmpty()) {
+            messages.add(lastMessage);
+            lastMessage = new String();
+        }
+
         ArrayDeque<String> newQueue = new ArrayDeque<>();
         for (String msg : messages) {
             newQueue.add(msg);
