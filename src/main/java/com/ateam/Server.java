@@ -35,12 +35,20 @@ public class Server {
     };
     Thread awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
 
+
+    public Server() {
+        try {
+            ss = new ServerSocket(PORT);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "[Server] Error creating server socket", e);
+        }
+    }
+
     /**
      * Entrypoint of the server.
      * @throws Exception
      */
     public void run() throws Exception {
-        ss = new ServerSocket(PORT);
         LOGGER.info("[Server] TCP Server is starting up, listening at port " + PORT + ".");
 
         while (true) {
@@ -52,15 +60,8 @@ public class Server {
             }
             else {
                 awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
-                ClientHandler client = new ClientHandler(socket);
-                socket = null;
-                clients.add(client);
-                client.start();
+                addNewClientHandler(socket);
             }
-
-
-            //System.out.println("[Server]\t Server running");
-
 
             for (var client: clients) {
                 if (!client.isConnected()) {
@@ -99,5 +100,16 @@ public class Server {
                 otherClient.sendMessage(message);
             }
         }
+    }
+
+    public void addNewClientHandler(Socket socket) throws ClientHandlerException {
+        ClientHandler client = new ClientHandler(socket);
+        socket = null;
+        clients.add(client);
+        client.start();
+    }
+
+    public ArrayList<ClientHandler> getClients() {
+        return clients;
     }
 }
