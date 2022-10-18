@@ -2,15 +2,16 @@ package com.ateam;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*
  * This class is the server side of the application. It manages multiple connections, waiting for messages to arrive.
  * When one client has sent a new message, it broadcast it to all current clients.
  */
 public class Server {
+    private static final Logger LOGGER = Logger.getLogger("Waiting for new connections");
     final int PORT = 49080;
 
     private ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();
@@ -19,11 +20,11 @@ public class Server {
 
     Runnable awaitNewConnections = () -> {
         try {
-            System.out.println("[Server]\tWaiting for new connections");
+            LOGGER.info("[Server]\tWaiting for new connections");
             socket = ss.accept();
         }
         catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "[Server] Error waiting for connections", e);
         }
     };
     Thread awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
@@ -34,7 +35,7 @@ public class Server {
      */
     public void run() throws Exception {
         ss = new ServerSocket(PORT);
-        System.out.println("[Server] TCP Server is starting up, listening at port " + PORT + ".");
+        LOGGER.info("[Server] TCP Server is starting up, listening at port " + PORT + ".");
 
         while (true) {
             // Setup new connections
@@ -57,13 +58,13 @@ public class Server {
 
             for (var client: clients) {
                 if (!client.isConnected()) {
-                    System.out.println("[Server]\tClient disconnected. Removing from pool");
+                    LOGGER.info("[Server]\tClient disconnected. Removing from pool");
                     client.close();
                     clients.remove(client);
                 }
                 // No -> close connection
                 if (client.checkPendingMessages()) {
-                    System.out.println("[Server]\t Pending messages to be sent");
+                    LOGGER.info("[Server]\t Pending messages to be sent");
                     broadcast(client);
                 }
             }
@@ -79,7 +80,7 @@ public class Server {
      */
     // Broadcast should use the client instead of the messages
     private void broadcast(ClientHandler client) throws IOException {
-        System.out.println("[Server]\t Broadcasting messages");
+        LOGGER.info("[Server]\t Broadcasting messages");
         var messages = client.getMessages();
 
         while (!messages.isEmpty()) {
@@ -87,11 +88,10 @@ public class Server {
 
             for (var otherClient: clients) {
                 if (otherClient != client) {
-                    System.out.println("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
+                    LOGGER.info("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
                     client.sendMessage(message);
                 }
             }
-
         }
     }
 }
