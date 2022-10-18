@@ -59,8 +59,8 @@ public class Server {
                 }
             }
             else {
-                awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
                 addNewClientHandler(socket);
+                awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
             }
 
             for (var client: clients) {
@@ -104,7 +104,7 @@ public class Server {
 
     public void addNewClientHandler(Socket socket) throws ClientHandlerException {
         ClientHandler client = new ClientHandler(socket);
-        socket = null;
+        this.socket = null;
         clients.add(client);
         client.start();
     }
