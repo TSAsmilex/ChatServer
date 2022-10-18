@@ -13,5 +13,4 @@ class ClientHandlerException extends Exception {
     public ClientHandlerException(String msg) {
         super(msg);
     }
-
 }
