@@ -5,30 +5,32 @@
 package com.ateam;
 
 import org.junit.Test;
+import org.mockito.Mockito;
+
 import static org.junit.Assert.*;
+
 
 /**
  *
  * @author pferna12
  */
 public class ServerTest {
-
     public ServerTest() {
     }
 
-    /**
-     * Test of run method, of class Server.
-     */
     @Test
-    public void testRun() throws Exception {
-        // GIVEN
-        System.out.println("run");
-        String[] args = null;
+    public void testBroadcastDoesNotSendToSelf() throws Exception {
+        Server server = new Server();
+        server.run();
 
-        // THEN
-        //Server.run(args);
+        ClientHandler client1 = new ClientHandler(null);
+        Mockito.mock(null);
+        // client1 mete un mensaje.
+        ClientHandler client2 = new ClientHandler(null);
 
-        // EXPECT
+        server.broadcast(client1);
+
+        assertTrue(!client1.checkPendingMessages());
+        assertTrue(client2.checkPendingMessages());
     }
-
 }
