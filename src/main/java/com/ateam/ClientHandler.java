@@ -40,33 +40,34 @@ public class ClientHandler extends Thread {
     Thread awaitMessageThread = new Thread(awaitMessage, "Await message");
 
     /**
+     * ClientHandler constructor
      *
      * @param socket
      * @throws com.ateam.ClientHandlerException
      */
     public ClientHandler(Socket socket) throws ClientHandlerException {
         super();
-        System.out.println("[ClientHandler] New socket detected with IP " + socket.getInetAddress() + ". Creating ClientHandler");
+        LOGGER.log(Level.INFO, "[ClientHandler] New socket detected with IP {0}. Creating ClientHandler", socket.getInetAddress());
         this.socket = socket;
 
         try {
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "BufferedReader failed", e);
+            LOGGER.log(Level.SEVERE, "[ClientHandler]\t BufferedReader failed", e);
             throw new ClientHandlerException("Failure in ClientHandler. Cannot build object.");
         }
 
         try {
             writer = new PrintStream(socket.getOutputStream());
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "PrintStream failed", e);
-            throw new ClientHandlerException("Cannot build object. Failure in ClientHandler.");
+            LOGGER.log(Level.SEVERE, "[ClientHandler]\t PrintStream failed", e);
+            throw new ClientHandlerException("Failure in ClientHandler. Cannot build object.");
         }
-
     }
 
     /**
      * Get messages in newQueue
+     *
      * @return a new cleaned ArrayDeque
      */
     public ArrayDeque<String> getMessages() {
@@ -79,6 +80,7 @@ public class ClientHandler extends Thread {
     }
 
     /**
+     * Send a message to the client
      *
      * @param message
      * @throws com.ateam.ClientHandlerException
@@ -89,22 +91,23 @@ public class ClientHandler extends Thread {
             // Send response to client
             writer.println(message);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "PrintStream failed", e);
+            LOGGER.log(Level.SEVERE, "[ClientHandler]\t PrintStream failed", e);
             throw new ClientHandlerException("Failure in ClientHandler. Check PrintStream.");
         }
 
     }
 
     /**
+     * Check if there are pending messages
      *
-     * @return
+     * @return false if there aren't messages
      */
     public boolean checkPendingMessages() {
         return !this.messages.isEmpty();
     }
 
     /**
-     *
+     * main method
      */
     @Override
     public void run() {
@@ -124,12 +127,13 @@ public class ClientHandler extends Thread {
             try {
                 Thread.sleep(200);
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Run failed", e);
+                LOGGER.log(Level.SEVERE, "[ClientHandler]\t Run failed", e);
             }
         }
     }
 
     /**
+     * check connection
      *
      * @return
      */
@@ -138,6 +142,7 @@ public class ClientHandler extends Thread {
     }
 
     /**
+     * close existing connection
      *
      * @throws ClientHandlerException
      */
@@ -145,7 +150,7 @@ public class ClientHandler extends Thread {
         try {
             socket.close();
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Error closing thread.", e);
+            LOGGER.log(Level.SEVERE, "[ClientHandler]\t Error closing thread.", e);
         }
     }
 }
