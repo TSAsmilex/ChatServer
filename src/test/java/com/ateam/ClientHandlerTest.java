@@ -28,7 +28,7 @@ public class ClientHandlerTest {
         ClientHandler instance = new ClientHandler(socket);
 
         // THEN
-        instance.awaitMessage();
+        //instance.awaitMessage();
 
         // EXPECT
         assertEquals(instance, this);
