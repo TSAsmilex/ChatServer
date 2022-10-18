@@ -57,6 +57,7 @@ public class Server {
 
             for (var client: clients) {
                 if (!client.isConnected()) {
+                    System.out.println("[Server]\tClient disconnected. Removing from pool");
                     client.close();
                     clients.remove(client);
                 }
