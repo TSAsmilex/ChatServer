@@ -86,11 +86,11 @@ public class Server {
         while (!messages.isEmpty()) {
             var message = messages.pop();
 
-            for (var otherClient: clients) {
-                if (otherClient != client) {
-                    LOGGER.info("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
-                    client.sendMessage(message);
-                }
+            var otherClients = clients.stream().filter(c -> c != client).toList();
+
+            for (var otherClient: otherClients) {
+                LOGGER.info("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
+                otherClient.sendMessage(message);
             }
         }
     }
