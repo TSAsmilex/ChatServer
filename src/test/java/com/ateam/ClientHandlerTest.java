@@ -5,7 +5,6 @@
 package com.ateam;
 
 import java.net.Socket;
-import java.util.ArrayDeque;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -47,7 +46,7 @@ public class ClientHandlerTest {
 
         //THEN
         instance.sendMessage("Hola mundo");
-
+        
         // EXPECT
         assertEquals("Hola mundo", instance.getMessages().getLast());
     }
@@ -61,10 +60,10 @@ public class ClientHandlerTest {
         System.out.println("checkPendingMessages");
         ClientHandler instance = null;
         boolean expResult = false;
-
+        
         //  THEN
         boolean result = instance.checkPendingMessages();
-
+        
         // EXPECT
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.

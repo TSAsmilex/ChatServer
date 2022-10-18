@@ -10,6 +10,12 @@ import java.util.logging.Logger;
  * This class is the server side of the application. It manages multiple connections, waiting for messages to arrive.
  * When one client has sent a new message, it broadcast it to all current clients.
  */
+
+/**
+ *
+ * @author pferna12
+ */
+
 public class Server {
     private static final Logger LOGGER = Logger.getLogger("Waiting for new connections");
     final int PORT = 49080;
