@@ -56,7 +56,10 @@ public class Server {
 
 
             for (var client: clients) {
-                //isALive()
+                if (!client.isConnected()) {
+                    client.close();
+                    clients.remove(client);
+                }
                 // No -> close connection
                 if (client.checkPendingMessages()) {
                     System.out.println("[Server]\t Pending messages to be sent");

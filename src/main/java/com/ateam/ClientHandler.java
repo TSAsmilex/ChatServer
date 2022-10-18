@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayDeque;
 
 /**
@@ -35,6 +36,7 @@ public class ClientHandler extends Thread {
     };
 
     Thread awaitMessageThread = new Thread(awaitMessage, "Await message");
+
 
     /**
      *
@@ -65,6 +67,7 @@ public class ClientHandler extends Thread {
         return newQueue;
     }
 
+
     /**
      *
      * @param message
@@ -80,6 +83,7 @@ public class ClientHandler extends Thread {
     public boolean checkPendingMessages() {
         return this.messages.size() > 0;
     }
+
 
     @Override
     public void run() {
@@ -104,6 +108,21 @@ public class ClientHandler extends Thread {
             catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+
+    public boolean isConnected() {
+        return socket.isConnected();
+    }
+
+
+    public void close() {
+        try {
+            socket.close();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
