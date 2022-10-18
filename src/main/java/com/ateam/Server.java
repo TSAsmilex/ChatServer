@@ -56,9 +56,11 @@ public class Server {
 
 
             for (var client: clients) {
+                //isALive()
+                // No -> close connection
                 if (client.checkPendingMessages()) {
                     System.out.println("[Server]\t Pending messages to be sent");
-                    broadcast(client.getMessages());
+                    broadcast(client);
                 }
             }
 
@@ -71,14 +73,19 @@ public class Server {
      * Send a message to all clients
      * @param messages queue of messages to be sent
      */
-    private void broadcast(ArrayDeque<String> messages) throws IOException {
+    // Broadcast should use the client instead of the messages
+    private void broadcast(ClientHandler client) throws IOException {
         System.out.println("[Server]\t Broadcasting messages");
+        var messages = client.getMessages();
+
         while (!messages.isEmpty()) {
             var message = messages.pop();
 
-            for (var client: clients) {
-                System.out.println("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
-                client.sendMessage(message);
+            for (var otherClient: clients) {
+                if (otherClient != client) {
+                    System.out.println("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
+                    client.sendMessage(message);
+                }
             }
 
         }
