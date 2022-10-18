@@ -23,6 +23,19 @@ public class ClientHandler extends Thread {
     BufferedReader reader;
     PrintStream writer;
 
+    Runnable awaitMessage = () -> {
+        System.out.println("[ClientHandler]\t Awaiting message");
+
+        try {
+            lastMessage = reader.readLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("[ClientHandlerAwaitMessage]\t Message received, with length " + lastMessage.length());
+    };
+
+    Thread awaitMessageThread = new Thread(awaitMessage, "Await message");
+
     /**
      *
      * @param socket
@@ -31,7 +44,7 @@ public class ClientHandler extends Thread {
     public ClientHandler(Socket socket) throws IOException {
         super();
 
-        System.out.println("[ClientHandler] New socket detected with IP" + socket.getInetAddress() + ". Creating ClientHandler");
+        System.out.println("[ClientHandler] New socket detected with IP " + socket.getInetAddress() + ". Creating ClientHandler");
 
         this.socket = socket;
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -73,21 +86,13 @@ public class ClientHandler extends Thread {
         while (true) {
             // If there are no messages pending => wake up a thread to await for a new one
             if (lastMessage.isEmpty()) {
-                Runnable awaitMessage = () -> {
-                    System.out.println("[ClientHandler]\t Awaiting message");
-
-                    try {
-                        lastMessage = reader.readLine();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println("[ClientHandlerAwaitMessage]\t Message received!" + lastMessage.length());
-                };
-
-                new Thread(awaitMessage).start();
+                if (!awaitMessageThread.isAlive()) {
+                    awaitMessageThread.start();
+                }
             }
             // New message received. Save it to the queue and clean it.
             else {
+                awaitMessageThread = new Thread(awaitMessage, "Await message");
                 messages.add(new String(lastMessage));
                 lastMessage = new String();
             }

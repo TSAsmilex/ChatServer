@@ -14,8 +14,19 @@ public class Server {
     final int PORT = 49080;
 
     private ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();
-    ServerAccepClient newConnections;
-    ServerSocket ss ;
+    Socket socket = null;
+    ServerSocket ss;
+
+    Runnable awaitNewConnections = () -> {
+        try {
+            System.out.println("[Server]\tWaiting for new connections");
+            socket = ss.accept();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    };
+    Thread awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
 
     /**
      * Entrypoint of the server.
@@ -24,23 +35,25 @@ public class Server {
     public void run() throws Exception {
         ss = new ServerSocket(PORT);
         System.out.println("[Server] TCP Server is starting up, listening at port " + PORT + ".");
-        newConnections = new ServerAccepClient(ss);
-
-        Socket socket = null;
-        newConnections.start();
 
         while (true) {
-            Thread.sleep(1000);
             // Setup new connections
-            if (newConnections.hasSocket()) {
-                System.out.println("[Server]\t New socket received. Added to list.");
-                socket = newConnections.getSocket();
+            if (socket == null) {
+                if (!awaitNewConnectionsThread.isAlive()) {
+                    awaitNewConnectionsThread.start();
+                }
+            }
+            else {
+                awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
                 ClientHandler client = new ClientHandler(socket);
+                socket = null;
                 clients.add(client);
                 client.start();
             }
 
-            System.out.println("[Server]\t Server running");
+
+            //System.out.println("[Server]\t Server running");
+
 
             for (var client: clients) {
                 if (client.checkPendingMessages()) {
@@ -48,6 +61,9 @@ public class Server {
                     broadcast(client.getMessages());
                 }
             }
+
+
+            Thread.sleep(1000);
         }
     }
 
@@ -61,6 +77,7 @@ public class Server {
             var message = messages.pop();
 
             for (var client: clients) {
+                System.out.println("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
                 client.sendMessage(message);
             }
 
