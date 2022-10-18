@@ -68,66 +68,66 @@ public class ClientHandlerTest {
     /**
      * Test of checkPendingMessages method, of class ClientHandler.
      */
-    @Test
-    public void testCheckPendingMessages() {
-        // GIVEN
-        System.out.println("checkPendingMessages");
-        ClientHandler instance = null;
-        boolean expResult = false;
-
-        //  THEN
-        boolean result = instance.checkPendingMessages();
-
-        // EXPECT
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getMessages method, of class ClientHandler.
-     */
-    @Test
+//    @Test
+//    public void testCheckPendingMessages() {
+//         GIVEN
+//        System.out.println("checkPendingMessages");
+//        ClientHandler instance = null;
+//        boolean expResult = false;
+//
+//          THEN
+//        boolean result = instance.checkPendingMessages();
+//
+//         EXPECT
+//        assertEquals(expResult, result);
+//         TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of getMessages method, of class ClientHandler.
+//     */
+//    @Test
 //    public void testGetMessages() throws IOException {
 //        
 //    }
-
-    /**
-     * Test of run method, of class ClientHandler.
-     */
+//
+//    /**
+//     * Test of run method, of class ClientHandler.
+//     */
 //    @Test
-    public void testRun() {
-        System.out.println("run");
-        ClientHandler instance = null;
-        instance.run();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of isConnected method, of class ClientHandler.
-     */
+//    public void testRun() {
+//        System.out.println("run");
+//        ClientHandler instance = null;
+//        instance.run();
+//         TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of isConnected method, of class ClientHandler.
+//     */
 //    @Test
-    public void testIsConnected() {
-        System.out.println("isConnected");
-        ClientHandler instance = null;
-        boolean expResult = false;
-        boolean result = instance.isConnected();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of close method, of class ClientHandler.
-     */
-    @Test
-    public void testClose() throws Exception {
-        System.out.println("close");
-        ClientHandler instance = null;
-        instance.close();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+//    public void testIsConnected() {
+//        System.out.println("isConnected");
+//        ClientHandler instance = null;
+//        boolean expResult = false;
+//        boolean result = instance.isConnected();
+//        assertEquals(expResult, result);
+//         TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of close method, of class ClientHandler.
+//     */
+//    @Test
+//    public void testClose() throws Exception {
+//        System.out.println("close");
+//        ClientHandler instance = null;
+//        instance.close();
+//         TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
     
 }
