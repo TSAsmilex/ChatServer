@@ -4,17 +4,24 @@
  */
 package com.ateam;
 
-import java.net.Socket;
-import java.util.ArrayDeque;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import java.io.BufferedReader;
+
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import org.mockito.Mockito;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  *
  * @author pferna12
  */
 public class ClientHandlerTest {
-
+    
     public ClientHandlerTest() {
     }
 
@@ -30,7 +37,6 @@ public class ClientHandlerTest {
 
         // THEN
         //instance.awaitMessage();
-
         // EXPECT
         assertEquals(instance, this);
     }
@@ -42,14 +48,21 @@ public class ClientHandlerTest {
     public void testSendMessage() throws Exception {
         // GIVEN
         System.out.println("sendMessage");
-        Socket socket = null;
-        ClientHandler instance = new ClientHandler(socket);
+        PrintWriter testWriter = Mockito.mock(PrintWriter.class);
+        BufferedReader testReader = Mockito.mock(BufferedReader.class);
+        Socket socket = Mockito.mock(Socket.class);
+  
+        InetAddress addr = InetAddress.getByName("127.0.0.1");
+        when(socket.getInetAddress()).thenReturn(addr);
+   
+        ClientHandler instance = new ClientHandler(socket, testReader, testWriter);
 
         //THEN
         instance.sendMessage("Hola mundo");
-        
+
         // EXPECT
-        assertEquals("Hola mundo", instance.getMessages().getLast());
+        verify(testWriter, times(1)).println("Hola mundo");
+        verify(testReader, times(0)).readLine();
     }
 
     /**
@@ -61,10 +74,10 @@ public class ClientHandlerTest {
         System.out.println("checkPendingMessages");
         ClientHandler instance = null;
         boolean expResult = false;
-        
+
         //  THEN
         boolean result = instance.checkPendingMessages();
-        
+
         // EXPECT
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
@@ -75,20 +88,14 @@ public class ClientHandlerTest {
      * Test of getMessages method, of class ClientHandler.
      */
     @Test
-    public void testGetMessages() {
-        System.out.println("getMessages");
-        ClientHandler instance = null;
-        ArrayDeque<String> expResult = null;
-        ArrayDeque<String> result = instance.getMessages();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+//    public void testGetMessages() throws IOException {
+//        
+//    }
 
     /**
      * Test of run method, of class ClientHandler.
      */
-    @Test
+//    @Test
     public void testRun() {
         System.out.println("run");
         ClientHandler instance = null;
@@ -100,7 +107,7 @@ public class ClientHandlerTest {
     /**
      * Test of isConnected method, of class ClientHandler.
      */
-    @Test
+//    @Test
     public void testIsConnected() {
         System.out.println("isConnected");
         ClientHandler instance = null;
@@ -122,5 +129,5 @@ public class ClientHandlerTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
-
+    
 }
