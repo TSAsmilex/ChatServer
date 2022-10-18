@@ -17,7 +17,11 @@ public class UserDB {
     private static final String DB_FILEPATH = "./db/user.csv";
     private HashSet<User> users = new HashSet<>();
 
-
+    /**
+     *
+     *
+     * Constructor
+      */
     public UserDB() {
         try {
             loadDB();
@@ -30,11 +34,21 @@ public class UserDB {
         }
     }
 
-
+    /**
+     *
+     * get the user from the database
+     */
     public HashSet<User> getUsers() {
         return users;
     }
 
+    /**
+     *
+     * Load the database from the file
+     * @return true if the file exists. Otherwise false
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
 
     public boolean loadDB() throws FileNotFoundException, IOException {
         File csvFile = new File(UserDB.DB_FILEPATH);
@@ -61,7 +75,11 @@ public class UserDB {
         return true;
     }
 
-
+    /**
+     * Tries to save the database to a file.
+     * @return true if the file was saved successfully. Otherwise false
+     * @throws IOException
+     */
     public boolean writeDB() throws IOException {
         String output = this.users.stream()
             .map(user -> new String (
@@ -84,6 +102,11 @@ public class UserDB {
     }
 
 
+    /**
+     * Tries to login the user
+     * @param user the user to be added
+     * @return false if the user already exists in the database.
+     */
     public boolean addUser(User user) {
         if (exists(user.getUsername())) {
             return false;
@@ -93,6 +116,11 @@ public class UserDB {
     }
 
 
+    /**
+     * Checks if a certain username exists in the database.
+     * @param username the username to be checked
+     * @return true if the username exists in the database. Otherwise false
+     */
     public boolean exists (String username) {
         return this.users.stream()
             .filter(u -> u.getUsername().equals(username))
@@ -101,6 +129,13 @@ public class UserDB {
     }
 
 
+    /**
+     * Tries to login the user
+     * @param username
+     * @param password
+     * @return false if the credentials were wrong.
+     * @throws LoginException
+     */
     public User login (String username, String password) throws LoginException {
         Optional<User> user = this.users.stream()
             .filter(u -> u.getUsername().equals(username) && u.getHashedPassword().equals(password))
