@@ -66,13 +66,8 @@ public class ClientHandler extends Thread {
         }
     }
 
-<<<<<<< HEAD
     public ClientHandler(Socket socket, BufferedReader reader, PrintWriter writer) {
-=======
-
-    public ClientHandler(Socket socket, BufferedReader reader, PrintStream writer) {
         super();
->>>>>>> master
         this.socket = socket;
         this.reader = reader;
         this.writer = writer;
