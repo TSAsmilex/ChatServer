@@ -38,6 +38,12 @@ public class User {
         }
 
         User o = (User) obj;
-        return o.getUsername() == this.username && o.getHashedPassword() == this.getHashedPassword();
+        return o.getUsername() == this.getUsername() && o.getHashedPassword() == this.getHashedPassword();
+    }
+
+
+    @Override
+    public int hashCode() {
+        return this.username.hashCode() + this.hashedPassword.hashCode();
     }
 }

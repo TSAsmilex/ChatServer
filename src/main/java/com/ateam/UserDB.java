@@ -1,4 +1,4 @@
-package com.tsystems;
+package com.ateam;
 
 
 import java.io.BufferedReader;
@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -50,14 +49,10 @@ public class UserDB {
             while ((line = br.readLine()) != null) {
                 String[] userString = line.split(";");
 
-                String              username       = userString[0];
-                String              hashedPassword = userString[1];
-                String              name           = userString[2];
-                Gender              gender         = Gender.fromString(userString[3]);
-                SexualOrientation   orientation    = SexualOrientation.fromString(userString[4]);
-                ArrayList<Interest> hobbies        = Interest.parseInterestList(userString[5]);
+                String username       = userString[0];
+                String hashedPassword = userString[1];
 
-                User user = new User(name, username, gender, orientation, hashedPassword, hobbies);
+                User user = new User(username, hashedPassword);
 
                 this.users.add(user);
             }
@@ -71,15 +66,7 @@ public class UserDB {
         String output = this.users.stream()
             .map(user -> new String (
                     user.getUsername() + ";"
-                +   user.getHashedPassword() + ";"
-                +   user.getName() + ";"
-                +   user.getGender().toString() + ";"
-                +   user.getOrientation().toString() + ";"
-                +   user.getHobbies()
-                        .stream()
-                        .map(interest -> interest.toString())
-                        .collect(Collectors.joining(","))
-                    + ";"
+                +   user.getHashedPassword()
             )).collect(Collectors.joining("\n"));
 
         File csvFile = new File(UserDB.DB_FILEPATH);
@@ -98,7 +85,7 @@ public class UserDB {
 
 
     public boolean addUser(User user) {
-        if (exists(user.getDni())) {
+        if (exists(user.getUsername())) {
             return false;
         }
 
@@ -106,17 +93,17 @@ public class UserDB {
     }
 
 
-    public boolean exists (String dni) {
+    public boolean exists (String username) {
         return this.users.stream()
-            .filter(u -> u.getDni().equals(dni))
+            .filter(u -> u.getUsername().equals(username))
             .findFirst()
             .isPresent();
     }
 
 
-    public User login (String dni, String password) throws LoginException {
+    public User login (String username, String password) throws LoginException {
         Optional<User> user = this.users.stream()
-            .filter(u -> u.getDni().equals(dni) && u.getHashedPassword().equals(password))
+            .filter(u -> u.getUsername().equals(username) && u.getHashedPassword().equals(password))
             .findFirst();
 
         if (!user.isPresent()) {

@@ -19,13 +19,13 @@ public class UserAuth {
     }
 
 
-    public User login (String dni, String password) throws LoginException {
+    public User login (String username, String password) throws LoginException {
         String hashedPassword = getSHA512(password);
 
         User user = null;
 
         try {
-            user = userDB.login(dni, hashedPassword);
+            user = userDB.login(username, hashedPassword);
         }
         catch (LoginException e) {
             throw new LoginException("Incorrect user or/and password");
@@ -35,10 +35,10 @@ public class UserAuth {
     }
 
 
-    public User registerUser(String name, String dni, String password) throws LoginException {
+    public User registerUser(String username, String password) throws LoginException {
         String hashedPassword = getSHA512(password);
 
-        User user = new User(name, dni, hashedPassword);
+        User user = new User(username, hashedPassword);
 
         if (!userDB.addUser(user)) {
             throw new LoginException("User already exists in the database");
@@ -49,7 +49,6 @@ public class UserAuth {
 
 
     public String getSHA512(String input){
-
         String toReturn = null;
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-512");
