@@ -17,7 +17,7 @@ import java.util.ArrayDeque;
  */
 public class ClientHandler extends Thread {
     ArrayDeque<String> messages = new ArrayDeque<>();
-    ClientHandlerAwaitMessage awaiter;
+    String lastMessage = new String();
 
     Socket socket;
     BufferedReader reader;
@@ -30,12 +30,12 @@ public class ClientHandler extends Thread {
      */
     public ClientHandler(Socket socket) throws IOException {
         super();
+
+        System.out.println("[ClientHandler] New socket detected with IP" + socket.getInetAddress() + ". Creating ClientHandler");
+
         this.socket = socket;
-        System.out.println("[ClientHandler] New socket detected " + socket.getInetAddress());
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         writer = new PrintStream(socket.getOutputStream());
-
-        awaiter = new ClientHandlerAwaitMessage(socket, reader);
     }
 
 
@@ -70,14 +70,34 @@ public class ClientHandler extends Thread {
 
     @Override
     public void run() {
-        // FIXME esto peta.
         while (true) {
-            if (awaiter.isEmpty()) {
-                awaiter.start();
+            // If there are no messages pending => wake up a thread to await for a new one
+            if (lastMessage.isEmpty()) {
+                Runnable awaitMessage = () -> {
+                    System.out.println("[ClientHandler]\t Awaiting message");
+
+                    try {
+                        lastMessage = reader.readLine();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("[ClientHandlerAwaitMessage]\t Message received!" + lastMessage.length());
+                };
+
+                new Thread(awaitMessage).start();
             }
+            // New message received. Save it to the queue and clean it.
             else {
-                System.out.println("[ClientHandler] Mensaje recibido");
-                messages.add(awaiter.getMessage());
+                messages.add(new String(lastMessage));
+                lastMessage = new String();
+            }
+
+
+            try {
+                Thread.sleep(200);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
