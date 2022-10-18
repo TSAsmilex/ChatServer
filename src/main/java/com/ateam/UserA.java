@@ -8,10 +8,10 @@ package com.ateam;
  *
  * @author pferna12
  */
-class ClientHandlerException extends Exception {
+class UserA {
 
-    public ClientHandlerException(String msg) {
-        super(msg);
+    UserA(String username, String password) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-
+    
 }
