@@ -2,32 +2,96 @@ package com.ateam;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.logging.Handler;
 
+/*
+ * This class is the server side of the application. It manages multiple connections, waiting for messages to arrive.
+ * When one client has sent a new message, it broadcast it to all current clients.
+ */
 public class Server {
+    final int PORT = 49080;
 
-    public static void run(String[] args) throws Exception {
-        int port = 49080;
-        Socket socket = null;
-        BufferedReader reader = null;  // Local reader from the client
-        PrintStream outputStream = null;  // Output stream to the client
+    private ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();
+    Socket socket = null;
+    ServerSocket ss;
 
-        String clientRequest = "";
-        String responseToClient = "";
-        ServerSocket ss = new ServerSocket(port);
-        System.out.println("TCP Server is starting up, listening at port " + port + ".");
+    Runnable awaitNewConnections = () -> {
+        try {
+            System.out.println("[Server]\tWaiting for new connections");
+            socket = ss.accept();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    };
+    Thread awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
+
+    /**
+     * Entrypoint of the server.
+     * @throws Exception
+     */
+    public void run() throws Exception {
+        ss = new ServerSocket(PORT);
+        System.out.println("[Server] TCP Server is starting up, listening at port " + PORT + ".");
 
         while (true) {
-            // Get request from client
-            socket = ss.accept();
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            clientRequest = reader.readLine();
-            System.out.println("[TCPServer] Get request [" + clientRequest + "] from Client.");
+            // Setup new connections
+            if (socket == null) {
+                if (!awaitNewConnectionsThread.isAlive()) {
+                    awaitNewConnectionsThread.start();
+                }
+            }
+            else {
+                awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
+                ClientHandler client = new ClientHandler(socket);
+                socket = null;
+                clients.add(client);
+                client.start();
+            }
 
-            // Send response to client
-            outputStream = new PrintStream(socket.getOutputStream());
-            responseToClient = clientRequest.toUpperCase();
-            outputStream.println(responseToClient);
-            System.out.println("[TCPServer] Send out response [" + responseToClient + "] to Client.");
+
+            //System.out.println("[Server]\t Server running");
+
+
+            for (var client: clients) {
+                if (!client.isConnected()) {
+                    System.out.println("[Server]\tClient disconnected. Removing from pool");
+                    client.close();
+                    clients.remove(client);
+                }
+                // No -> close connection
+                if (client.checkPendingMessages()) {
+                    System.out.println("[Server]\t Pending messages to be sent");
+                    broadcast(client);
+                }
+            }
+
+
+            Thread.sleep(1000);
+        }
+    }
+
+    /**
+     * Send a message to all clients
+     * @param messages queue of messages to be sent
+     */
+    // Broadcast should use the client instead of the messages
+    private void broadcast(ClientHandler client) throws IOException {
+        System.out.println("[Server]\t Broadcasting messages");
+        var messages = client.getMessages();
+
+        while (!messages.isEmpty()) {
+            var message = messages.pop();
+
+            for (var otherClient: clients) {
+                if (otherClient != client) {
+                    System.out.println("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
+                    client.sendMessage(message);
+                }
+            }
+
         }
     }
 }

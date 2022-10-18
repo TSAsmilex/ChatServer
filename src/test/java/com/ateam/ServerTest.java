@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
  * @author pferna12
  */
 public class ServerTest {
-    
+
     public ServerTest() {
     }
 
@@ -21,14 +21,14 @@ public class ServerTest {
      */
     @Test
     public void testRun() throws Exception {
-        // GIVEN 
+        // GIVEN
         System.out.println("run");
         String[] args = null;
-        
+
         // THEN
-        Server.run(args);
-        
+        //Server.run(args);
+
         // EXPECT
     }
-    
+
 }

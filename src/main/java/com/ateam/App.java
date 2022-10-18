@@ -12,15 +12,14 @@ public class App
     private static final Logger LOGGER = Logger.getLogger("App");
     public static void main( String[] args )
     {
-        
+        var server = new Server();
         LOGGER.info("Hola mundo");
-        try {
-            Server.run(args);
 
+        try {
+            server.run();
         }
         catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.toString(), e);
         }
-        System.out.println( "Hello World!" );
     }
 }
