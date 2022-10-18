@@ -9,12 +9,15 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.security.auth.login.LoginException;
 
 public class UserDB {
-    private static final String DB_FILEPATH = "./db/user.csv";
+    private static final Logger LOGGER = Logger.getLogger("userDB");
+    public static final String DB_FILEPATH = "./db/user.csv";
     private HashSet<User> users = new HashSet<>();
 
     /**
@@ -27,10 +30,10 @@ public class UserDB {
             loadDB();
         }
         catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.INFO, "The database " + DB_FILEPATH + " does not exist.");
         }
         catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.INFO, "The database " + DB_FILEPATH + " does not exist.");
         }
     }
 
