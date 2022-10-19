@@ -7,7 +7,6 @@ package com.ateam;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayDeque;
@@ -142,6 +141,7 @@ public class ClientHandler extends Thread {
                     Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "Received " + action);
                 } catch (IOException ex) {
                     Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, "Error reading", ex);
+                    break;
                 }
 
                 if (action.equalsIgnoreCase("login") || action.equalsIgnoreCase("register")) {
