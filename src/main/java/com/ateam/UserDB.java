@@ -9,12 +9,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.security.auth.login.LoginException;
 
 public class UserDB {
     private static final String DB_FILEPATH = "./db/user.csv";
+    private static final Logger LOGGER = Logger.getLogger("UserDB");
     private HashSet<User> users = new HashSet<>();
 
 
@@ -40,6 +42,7 @@ public class UserDB {
         File csvFile = new File(UserDB.DB_FILEPATH);
 
         if (!csvFile.exists()) {
+            LOGGER.warning("[UserDB]\tThe database file could not be found.");
             return false;
         }
 
