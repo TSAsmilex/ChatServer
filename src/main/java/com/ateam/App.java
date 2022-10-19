@@ -18,7 +18,6 @@ public class App
     public static void main( String[] args )
     {
         var server = new Server();
-        LOGGER.info("Hola mundo");
 
         try {
             server.run();
