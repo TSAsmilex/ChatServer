@@ -44,6 +44,10 @@ public class ClientHandler extends Thread {
         }
     };
 
+    public String getLastMessage(){
+        return lastMessage;
+    }
+
     Thread awaitMessageThread = new Thread(awaitMessage, "Await message");
 
     /**
