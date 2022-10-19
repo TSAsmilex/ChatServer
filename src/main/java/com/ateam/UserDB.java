@@ -1,6 +1,5 @@
 package com.ateam;
 
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,15 +23,13 @@ public class UserDB {
      *
      *
      * Constructor
-      */
+     */
     public UserDB() {
         try {
             loadDB();
-        }
-        catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             LOGGER.log(Level.INFO, "The database " + DB_FILEPATH + " does not exist.");
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.log(Level.INFO, "The database " + DB_FILEPATH + " does not exist.");
         }
     }
@@ -48,11 +45,22 @@ public class UserDB {
     /**
      *
      * Load the database from the file
+     *
      * @return true if the file exists. Otherwise false
      * @throws IOException
      * @throws FileNotFoundException
      */
 
+     public String getPassword(String username) throws LoginException {
+        Optional<User> user = users.stream().filter(u -> u.getUsername().equals(username)).findFirst();
+        if (user.isPresent()) {
+            return user.get().getHashedPassword();
+        } else {
+            throw new LoginException("User does not exist");
+        }
+    }
+
+    
     public boolean loadDB() throws FileNotFoundException, IOException {
         File csvFile = new File(UserDB.DB_FILEPATH);
 
@@ -66,7 +74,7 @@ public class UserDB {
             while ((line = br.readLine()) != null) {
                 String[] userString = line.split(";");
 
-                String username       = userString[0];
+                String username = userString[0];
                 String hashedPassword = userString[1];
 
                 User user = new User(username, hashedPassword);
@@ -80,17 +88,18 @@ public class UserDB {
 
     /**
      * Tries to save the database to a file.
+     *
      * @return true if the file was saved successfully. Otherwise false
      * @throws IOException
      */
-    public boolean writeDB() throws IOException {
+    public boolean writeDB(String path) throws IOException {
         String output = this.users.stream()
-            .map(user -> new String (
-                    user.getUsername() + ";"
-                +   user.getHashedPassword()
-            )).collect(Collectors.joining("\n"));
+                .map(user -> new String(
+                        user.getUsername() + ";"
+                                + user.getHashedPassword()))
+                .collect(Collectors.joining("\n"));
 
-        File csvFile = new File(UserDB.DB_FILEPATH);
+        File csvFile = new File(path);
 
         if (!csvFile.exists()) {
             csvFile.getParentFile().mkdirs();
@@ -104,9 +113,9 @@ public class UserDB {
         return csvFile.exists();
     }
 
-
     /**
      * Tries to login the user
+     *
      * @param user the user to be added
      * @return false if the user already exists in the database.
      */
@@ -118,34 +127,35 @@ public class UserDB {
         return this.users.add(user);
     }
 
-
     /**
      * Checks if a certain username exists in the database.
+     *
      * @param username the username to be checked
      * @return true if the username exists in the database. Otherwise false
      */
-    public boolean exists (String username) {
+    public boolean exists(String username) {
         return this.users.stream()
-            .filter(u -> u.getUsername().equals(username))
-            .findFirst()
-            .isPresent();
+                .filter(u -> u.getUsername().equals(username))
+                .findFirst()
+                .isPresent();
     }
-
 
     /**
      * Tries to login the user
+     *
      * @param username
      * @param password
      * @return false if the credentials were wrong.
      * @throws LoginException
      */
-    public User login (String username, String password) throws LoginException {
+    public User login(String username, String password) throws LoginException {
         Optional<User> user = this.users.stream()
-            .filter(u -> u.getUsername().equals(username) && u.getHashedPassword().equals(password))
-            .findFirst();
+                .filter(u -> u.getUsername().equals(username)
+                        && u.getHashedPassword().equals(password))
+                .findFirst();
 
         if (!user.isPresent()) {
-            throw new LoginException("Credenciales inválidos");
+            throw new LoginException("Invalid credentials");
         }
 
         return user.get();

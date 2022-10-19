@@ -28,7 +28,6 @@ public class ClientHandler extends Thread {
 
     Runnable awaitMessage = () -> {
         System.out.println("[ClientHandler]\t Awaiting message");
-
         try {
             lastMessage = reader.readLine();
         } catch (Exception e) {
@@ -36,6 +35,10 @@ public class ClientHandler extends Thread {
         }
         System.out.println("[ClientHandlerAwaitMessage]\t Message received, with length " + lastMessage.length());
     };
+
+    public String getLastMessage(){
+        return lastMessage;
+    }
 
     Thread awaitMessageThread = new Thread(awaitMessage, "Await message");
 
@@ -47,7 +50,8 @@ public class ClientHandler extends Thread {
      */
     public ClientHandler(Socket socket) throws ClientHandlerException {
         super();
-        LOGGER.log(Level.INFO, "[ClientHandler] New socket detected with IP {0}. Creating ClientHandler", socket.getInetAddress());
+        LOGGER.log(Level.INFO, "[ClientHandler] New socket detected with IP {0}. Creating ClientHandler",
+                socket.getInetAddress());
         this.socket = socket;
 
         try {
@@ -64,7 +68,6 @@ public class ClientHandler extends Thread {
             throw new ClientHandlerException("Failure in ClientHandler. Cannot build object.");
         }
     }
-
 
     public ClientHandler(Socket socket, BufferedReader reader, PrintStream writer) {
         super();
