@@ -44,6 +44,8 @@ public class Server {
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "[Server] Error creating server socket", e);
         }
+
+        this.userAuth = new UserAuth(db);
     }
 
     /**
