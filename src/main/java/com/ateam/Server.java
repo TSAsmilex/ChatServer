@@ -3,6 +3,8 @@ package com.ateam;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -10,13 +12,12 @@ import java.util.logging.Logger;
  * This class is the server side of the application. It manages multiple connections, waiting for messages to arrive.
  * When one client has sent a new message, it broadcast it to all current clients.
  */
-
 /**
  *
  * @author pferna12
  */
-
 public class Server {
+
     private static final Logger LOGGER = Logger.getLogger("Waiting for new connections");
     final int PORT = 49080;
     private UserAuth userAuth;
@@ -25,18 +26,17 @@ public class Server {
     private ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();
     Socket socket = null;
     ServerSocket ss;
+    private HashMap<String, ArrayList<ClientHandler>> ChatsRooms = new HashMap<>();
 
     Runnable awaitNewConnections = () -> {
         try {
             LOGGER.info("[Server]\tWaiting for new connections");
             socket = ss.accept();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "[Server] Error waiting for connections", e);
         }
     };
     Thread awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
-
 
     public Server() {
         try {
@@ -46,10 +46,12 @@ public class Server {
         }
 
         this.userAuth = new UserAuth(db);
+        ChatsRooms.put("General", clients);
     }
 
     /**
      * Entrypoint of the server.
+     *
      * @throws Exception
      */
     public void run() throws Exception {
@@ -61,13 +63,12 @@ public class Server {
                 if (!awaitNewConnectionsThread.isAlive()) {
                     awaitNewConnectionsThread.start();
                 }
-            }
-            else {
+            } else {
                 addNewClientHandler(socket, userAuth);
                 awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
             }
 
-            for (var client: clients) {
+            for (var client : clients) {
                 if (!client.isConnected()) {
                     LOGGER.info("[Server]\tClient disconnected. Removing from pool");
                     client.close();
@@ -80,13 +81,13 @@ public class Server {
                 }
             }
 
-
             Thread.sleep(1000);
         }
     }
 
     /**
      * Send a message to all clients
+     *
      * @param messages queue of messages to be sent
      */
     // Broadcast should use the client instead of the messages
@@ -99,7 +100,7 @@ public class Server {
 
             var otherClients = clients.stream().filter(c -> c != client).toList();
 
-            for (var otherClient: otherClients) {
+            for (var otherClient : otherClients) {
                 LOGGER.info("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
                 otherClient.sendMessage(message);
             }
@@ -115,5 +116,42 @@ public class Server {
 
     public ArrayList<ClientHandler> getClients() {
         return clients;
+    }
+
+    public void joinRoom(String roomname, ClientHandler client) {
+        boolean found= false;
+        //Check if exists a chatroom with the name writed.
+        for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : ChatsRooms.entrySet()) {
+            String key = chatroom.getKey();
+            //If exists, add the client to the array
+            if (key.equalsIgnoreCase(roomname)) {
+                chatroom.getValue().add(client);
+                found = true;
+                LOGGER.info(client.getName()+" has joined to "+ roomname);
+            }
+        }
+        //If the chatroom doesn't exists, create a new one and add the client.
+        if (found==false){
+           ArrayList<ClientHandler> chatRoomClient = new ArrayList<>();
+           chatRoomClient.add(client);
+            ChatsRooms.put(roomname, chatRoomClient);
+            LOGGER.info(roomname+ " has been created");
+        }
+        
+    }
+    
+    public void listRoom(ClientHandler client){
+        String chatslist="";
+        for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : ChatsRooms.entrySet()) {
+            String key = chatroom.getKey();
+            ArrayList value = chatroom.getValue();
+            
+         chatslist += key +"[" + value.size()+"]\n";
+        }
+        client.sendMessage(chatslist);
+    }
+    
+    public void leaveRoom(ClientHandler client){
+        
     }
 }
