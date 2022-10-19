@@ -15,8 +15,9 @@ import java.util.stream.Collectors;
 import javax.security.auth.login.LoginException;
 
 public class UserDB {
-    private static final Logger LOGGER = Logger.getLogger("userDB");
-    public static final String DB_FILEPATH = "./db/user.csv";
+    private static final String DB_FILEPATH = "./db/user.csv";
+    private static final Logger LOGGER = Logger.getLogger("UserDB");
+
     private HashSet<User> users = new HashSet<>();
 
     /**
@@ -60,11 +61,12 @@ public class UserDB {
         }
     }
 
-    
+
     public boolean loadDB() throws FileNotFoundException, IOException {
         File csvFile = new File(UserDB.DB_FILEPATH);
 
         if (!csvFile.exists()) {
+            LOGGER.warning("[UserDB]\tThe database file could not be found.");
             return false;
         }
 

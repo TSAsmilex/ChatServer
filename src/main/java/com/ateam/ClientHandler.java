@@ -33,13 +33,14 @@ public class ClientHandler extends Thread {
     private User user;
 
     Runnable awaitMessage = () -> {
-        Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "[ClientHandler]\t Awaiting message");
+        LOGGER.info("[ClientHandler]\tAwaiting message");
 
         try {
             lastMessage = reader.readLine();
-            Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "[ClientHandlerAwaitMessage]\t Message received, with length " + lastMessage.length());
+            LOGGER.info("[ClientHandler]\tMessage received with size " + lastMessage.length() + ".");
         } catch (Exception e) {
             e.printStackTrace();
+            LOGGER.info("[ClientHandler]\tClient has likely disconnected.");
         }
     };
 
@@ -57,10 +58,10 @@ public class ClientHandler extends Thread {
      */
     public ClientHandler(Socket socket, UserAuth ua) throws ClientHandlerException {
         super();
-        LOGGER.log(Level.INFO, "[ClientHandler] New socket detected with IP {0}. Creating ClientHandler",
-                socket.getInetAddress());
         this.socket = socket;
         userauth = ua;
+
+        LOGGER.log(Level.INFO, "[ClientHandler]\tNew socket detected with IP {0}. Creating ClientHandler.", socket.getInetAddress());
 
         try {
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -76,6 +77,7 @@ public class ClientHandler extends Thread {
             throw new ClientHandlerException("Failure in ClientHandler. Cannot build object.");
         }
     }
+
 
     public ClientHandler(Socket socket, BufferedReader reader, PrintWriter writer) {
         super();
@@ -113,6 +115,7 @@ public class ClientHandler extends Thread {
     public void sendMessage(String message) {
         try {
             // Send response to client
+            LOGGER.info("Sending message + " + message + " to client " + socket.getInetAddress() + ".");
             writer.println(message);
             writer.flush();
         } catch (Exception e) {
@@ -138,13 +141,14 @@ public class ClientHandler extends Thread {
         // while the user isn't logged.
         while (true) {
             if (!logged) {
-                sendMessage("Welcome \nType your action login/register");
+                sendMessage("Welcome. Please login or register in order to continue.");
+
                 String action = "";
                 try {
                     action = reader.readLine().toLowerCase().trim();
-                    Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "Received " + action);
+                    LOGGER.info("[ClientHandler]\tReceived " + action);
                 } catch (IOException ex) {
-                    Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, "Error reading", ex);
+                    LOGGER.info("[ClientHandler]\tError reading from socket. It is possible that the client has disconnected.");
                     break;
                 }
 
@@ -155,14 +159,17 @@ public class ClientHandler extends Thread {
                         String username = reader.readLine();
                         sendMessage("Password: ");
                         String pass = reader.readLine();
-                        Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "Received " + username + ", " + pass);
+
+                        LOGGER.info("[ClientHandler]\tReceived credentials " + username + ", " + pass);
 
                         if (action.equalsIgnoreCase("login")) {
                             //Check if the user exists with the username/pass getted.
                             this.user = userauth.login(username, pass);
+                            LOGGER.info("[ClientHandler]\tUser " + username + " logged in correctly.");
                         } else {
                             //Check if the user exists with the username/pass getted.
                             this.user = userauth.registerUser(username, pass);
+                            LOGGER.info("[ClientHandler]\tUser " + username + " registered correctly.");
                         }
                         logged = true;
 
@@ -172,11 +179,10 @@ public class ClientHandler extends Thread {
                         Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, "Login error", e);
                         sendMessage("error");
                     } catch (IOException ex) {
-                        Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, "Fail to read the line from client", ex);
+                        LOGGER.severe("[ClientHandler]\tFail to read the line from client");
                     }
                 } else {
-                    sendMessage("Introduce login/register");
-                    Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "Incorrect action detected. Restarting loop");
+                    sendMessage("Please introduce \"login\" or \"register\".");
                 }
             } //if the user is logged
             else {
@@ -195,7 +201,7 @@ public class ClientHandler extends Thread {
                 try {
                     Thread.sleep(200);
                 } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "[ClientHandler]\t Run failed", e);
+                    LOGGER.log(Level.SEVERE, "[ClientHandler]\tRun failed", e);
                 }
             }
         }
@@ -207,7 +213,12 @@ public class ClientHandler extends Thread {
      * @return
      */
     public boolean isConnected() {
-        return socket.isConnected();
+        try {
+            socket.getOutputStream().write(0);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     /**

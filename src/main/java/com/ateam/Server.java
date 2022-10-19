@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  */
 
 public class Server {
-    private static final Logger LOGGER = Logger.getLogger("Waiting for new connections");
+    private static final Logger LOGGER = Logger.getLogger("Server");
     final int PORT = 49080;
     private UserAuth userAuth;
     private UserDB db = new UserDB();
@@ -32,7 +32,7 @@ public class Server {
             socket = ss.accept();
         }
         catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "[Server] Error waiting for connections", e);
+            LOGGER.log(Level.SEVERE, "[Server]\tError waiting for connections", e);
         }
     };
     Thread awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
@@ -42,14 +42,7 @@ public class Server {
         try {
             ss = new ServerSocket(PORT);
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "[Server] Error creating server socket", e);
-        }
-
-        try {
-            db.loadDB();
-        }
-        catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "[Server] Error loading database", e);
+            LOGGER.log(Level.SEVERE, "[Server]\tThe server socket could not be initialized.", e);
         }
 
         this.userAuth = new UserAuth(db);
@@ -60,7 +53,7 @@ public class Server {
      * @throws Exception
      */
     public void run() throws Exception {
-        LOGGER.info("[Server] TCP Server is starting up, listening at port " + PORT + ".");
+        LOGGER.info("[Server]\tTCP Server is starting up, listening at port " + PORT + ".");
 
         while (true) {
             // Setup new connections
@@ -74,13 +67,9 @@ public class Server {
                 awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
             }
 
+            removeOfflineClients();
+
             for (var client: clients) {
-                if (!client.isConnected()) {
-                    LOGGER.info("[Server]\tClient disconnected. Removing from pool");
-                    client.close();
-                    client.interrupt();
-                    clients.remove(client);
-                }
                 if (client.checkPendingMessages()) {
                     LOGGER.info("[Server]\t Pending messages to be sent");
                     broadcast(client);
@@ -118,9 +107,20 @@ public class Server {
         this.socket = null;
         clients.add(client);
         client.start();
+        LOGGER.info("[Server]\tNew client connected");
     }
+
 
     public ArrayList<ClientHandler> getClients() {
         return clients;
+    }
+
+    public void removeOfflineClients() {
+        var disconnected = clients.stream().filter(c -> !c.isConnected()).toList();
+
+        if (disconnected.size() > 0) {
+            LOGGER.info("[Server]\tRemoving " + disconnected.size() + " disconnected clients");
+            clients.removeAll(disconnected);
+        }
     }
 }
