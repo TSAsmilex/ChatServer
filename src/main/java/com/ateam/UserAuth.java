@@ -2,6 +2,7 @@ package com.ateam;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.util.logging.Logger;
 
 import javax.security.auth.login.LoginException;
 
@@ -12,6 +13,7 @@ import javax.security.auth.login.LoginException;
  */
 public class UserAuth {
     private UserDB userDB;
+    private static final Logger LOGGER = Logger.getLogger("UserAuth");
 
 
     public UserAuth(UserDB userDB) {
@@ -28,7 +30,7 @@ public class UserAuth {
             user = userDB.login(username, hashedPassword);
         }
         catch (LoginException e) {
-            throw new LoginException("Incorrect user or/and password");
+            LOGGER.warning("[UserAuth]\tIncorrect user or/and password");
         }
 
         return user;
