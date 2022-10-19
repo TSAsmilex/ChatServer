@@ -37,11 +37,10 @@ public class ClientHandler extends Thread {
 
         try {
             lastMessage = reader.readLine();
+            Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "[ClientHandlerAwaitMessage]\t Message received, with length " + lastMessage.length());
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "[ClientHandlerAwaitMessage]\t Message received, with length " + lastMessage.length());
-
     };
 
     public String getLastMessage(){
