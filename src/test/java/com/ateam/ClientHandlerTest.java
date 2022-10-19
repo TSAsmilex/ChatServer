@@ -4,9 +4,17 @@
  */
 package com.ateam;
 
+import java.io.BufferedReader;
+import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import org.junit.Test;
+import org.mockito.Mockito;
+
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -20,18 +28,22 @@ public class ClientHandlerTest {
     /**
      * Test of awaitMessage method, of class ClientHandler.
      */
-    @Test
+    @Test(timeout = 2000)
     public void testAwaitMessage() throws Exception {
-        // GIVEN
         System.out.println("awaitMessage");
-        Socket socket = null;
-        ClientHandler instance = new ClientHandler(socket);
+        Socket socket = Mockito.mock(Socket.class);
+        BufferedReader reader = Mockito.mock(BufferedReader.class);
+        when(reader.readLine()).thenReturn("Hello");
+        ClientHandler instance = new ClientHandler(socket, reader, null);
+        System.out.println("Last message: " + instance.getLastMessage());
 
-        // THEN
-        //instance.awaitMessage();
+        instance.awaitMessageThread.start();
 
-        // EXPECT
-        assertEquals(instance, this);
+        while (instance.getLastMessage().equals("")) {
+
+        }
+
+        assertEquals("Hello", instance.getLastMessage());
     }
 
     /**
@@ -41,33 +53,43 @@ public class ClientHandlerTest {
     public void testSendMessage() throws Exception {
         // GIVEN
         System.out.println("sendMessage");
-        Socket socket = null;
-        ClientHandler instance = new ClientHandler(socket);
+        PrintStream testWriter = Mockito.mock(PrintStream.class);
+        BufferedReader testReader = Mockito.mock(BufferedReader.class);
+        Socket socket = Mockito.mock(Socket.class);
 
-        //THEN
+        InetAddress addr = InetAddress.getByName("127.0.0.1");
+        when(socket.getInetAddress()).thenReturn(addr);
+
+        ClientHandler instance = new ClientHandler(socket, testReader, testWriter);
+
+        // THEN
         instance.sendMessage("Hola mundo");
-        
+
         // EXPECT
-        assertEquals("Hola mundo", instance.getMessages().getLast());
+        verify(testWriter, times(1)).println("Hola mundo");
+        verify(testReader, times(0)).readLine();
     }
 
     /**
      * Test of checkPendingMessages method, of class ClientHandler.
+     *
+     * @throws ClientHandlerException
      */
     @Test
-    public void testCheckPendingMessages() {
+    public void testCheckPendingMessages() throws ClientHandlerException {
         // GIVEN
         System.out.println("checkPendingMessages");
-        ClientHandler instance = null;
+        PrintStream testWriter = Mockito.mock(PrintStream.class);
+        BufferedReader testReader = Mockito.mock(BufferedReader.class);
+        Socket socket = Mockito.mock(Socket.class);
+        ClientHandler instance = new ClientHandler(socket, testReader, testWriter);
+
+        // THEN
         boolean expResult = false;
-        
-        //  THEN
         boolean result = instance.checkPendingMessages();
-        
+
         // EXPECT
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
 }

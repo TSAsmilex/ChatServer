@@ -43,29 +43,54 @@ public class UserDBTest {
 
     @Test
     public void testLoadDB() {
-
-    }
-
-    @Test
-    public void testLogin() {
-
-    }
-
-    @Test
-    public void testWriteDB() throws FileNotFoundException, IOException {
         UserDB db = new UserDB();
-        User user = new User("name", "password");
+        User user = new User("name1", "password1");
 
         db.addUser(user);
 
         try {
-            db.writeDB();
-            fail();
+            db.loadDB();
+        }
+        catch (FileNotFoundException e) {
+            fail("The database " + UserDB.DB_FILEPATH + " does not exist.");
+        }
+        catch (IOException e) {
+            fail("The database " + UserDB.DB_FILEPATH + " does not exist.");
+        }
+
+        assert(db.getUsers().contains(user));
+    }
+
+    @Test
+    public void testLogin() {
+        UserDB db = new UserDB();
+        User user = new User("name1", "password1");
+
+        db.addUser(user);
+
+        try {
+            assert((db.login(user.getUsername(), user.getHashedPassword()).equals(user)));
+        }
+        catch (Exception e) {
+            fail("The user " + user.getUsername() + " does not exist.");
+        }
+    }
+
+    @Test
+    public void testWriteDB() throws FileNotFoundException, IOException {
+        UserDB db   = new UserDB();
+        User   user = new User("name", "password");
+        String path = new String("./db/userTest.csv");
+
+        db.addUser(user);
+
+        try {
+            db.writeDB(path);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        File csvFile = new File(UserDB.DB_FILEPATH);
+        File csvFile = new File(path);
 
         assert(csvFile.exists());
 
