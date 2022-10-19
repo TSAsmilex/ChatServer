@@ -107,6 +107,7 @@ public class ClientHandler extends Thread {
      *
      */
     public void sendMessage(String message) {
+        System.out.println("enviando: " + message);
         try {
             // Send response to client
             writer.println(message);
@@ -132,12 +133,12 @@ public class ClientHandler extends Thread {
     public void run() {
         // while the user isn't logged.
         while (true) {
-
             if (!logged) {
                 sendMessage("Welcome \n Type your action login/register");
                 String action = "";
                 try {
                     action = reader.readLine().toLowerCase().trim();
+                    Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "Received " + action);
                 } catch (IOException ex) {
                     Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, "Error reading", ex);
                 }
@@ -149,6 +150,7 @@ public class ClientHandler extends Thread {
                         String username = reader.readLine();
                         sendMessage("Password: ");
                         String pass = reader.readLine();
+                        Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "Received " + username + ", " + pass);
 
                         if (action.equalsIgnoreCase("login")) {
                             //Check if the user exists with the username/pass getted.
@@ -169,6 +171,7 @@ public class ClientHandler extends Thread {
                     }
                 } else {
                     sendMessage("Introduce login/register");
+                    Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "Incorrect action detected. Restarting loop");
                 }
             } //if the user is logged 
             else {

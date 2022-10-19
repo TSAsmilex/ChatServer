@@ -71,7 +71,6 @@ public class Server {
                     client.close();
                     clients.remove(client);
                 }
-                // No -> close connection
                 if (client.checkPendingMessages()) {
                     LOGGER.info("[Server]\t Pending messages to be sent");
                     broadcast(client);
