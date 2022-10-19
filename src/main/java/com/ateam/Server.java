@@ -74,13 +74,9 @@ public class Server {
                 awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
             }
 
+            removeOfflineClients();
+
             for (var client: clients) {
-                if (!client.isConnected()) {
-                    LOGGER.info("[Server]\tClient disconnected. Removing from pool");
-                    client.close();
-                    client.interrupt();
-                    clients.remove(client);
-                }
                 if (client.checkPendingMessages()) {
                     LOGGER.info("[Server]\t Pending messages to be sent");
                     broadcast(client);
@@ -122,5 +118,14 @@ public class Server {
 
     public ArrayList<ClientHandler> getClients() {
         return clients;
+    }
+
+    public void removeOfflineClients() {
+        var disconnected = clients.stream().filter(c -> !c.isConnected()).toList();
+
+        if (disconnected.size() > 0) {
+            LOGGER.info("[Server]\tRemoving " + disconnected.size() + " disconnected clients");
+            clients.removeAll(disconnected);
+        }
     }
 }
