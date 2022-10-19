@@ -111,6 +111,7 @@ public class ClientHandler extends Thread {
         try {
             // Send response to client
             writer.println(message);
+            writer.flush();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "[ClientHandler]\t PrintStream failed", e);
         }
@@ -134,7 +135,7 @@ public class ClientHandler extends Thread {
         // while the user isn't logged.
         while (true) {
             if (!logged) {
-                sendMessage("Welcome \n Type your action login/register");
+                sendMessage("Welcome \nType your action login/register");
                 String action = "";
                 try {
                     action = reader.readLine().toLowerCase().trim();
@@ -173,7 +174,7 @@ public class ClientHandler extends Thread {
                     sendMessage("Introduce login/register");
                     Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "Incorrect action detected. Restarting loop");
                 }
-            } //if the user is logged 
+            } //if the user is logged
             else {
                 // If there are no messages pending => wake up a thread to await for a new one
                 if (lastMessage.isEmpty()) {
