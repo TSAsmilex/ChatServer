@@ -203,7 +203,12 @@ public class ClientHandler extends Thread {
      * @return
      */
     public boolean isConnected() {
-        return socket.isConnected();
+        try {
+            socket.getOutputStream().write(0);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     /**
