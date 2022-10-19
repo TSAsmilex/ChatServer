@@ -19,6 +19,8 @@ import java.util.logging.Logger;
 public class Server {
     private static final Logger LOGGER = Logger.getLogger("Waiting for new connections");
     final int PORT = 49080;
+    private UserAuth userAuth;
+    private UserDB db = new UserDB();
 
     private ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();
     Socket socket = null;
@@ -59,7 +61,7 @@ public class Server {
                 }
             }
             else {
-                addNewClientHandler(socket);
+                addNewClientHandler(socket, userAuth);
                 awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
             }
 
@@ -102,8 +104,8 @@ public class Server {
         }
     }
 
-    public void addNewClientHandler(Socket socket) throws ClientHandlerException {
-        ClientHandler client = new ClientHandler(socket);
+    public void addNewClientHandler(Socket socket, UserAuth ua) throws ClientHandlerException {
+        ClientHandler client = new ClientHandler(socket, ua);
         this.socket = null;
         clients.add(client);
         client.start();
