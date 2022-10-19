@@ -37,12 +37,15 @@ public class ClientHandler extends Thread {
 
         try {
             lastMessage = reader.readLine();
+            Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "[ClientHandlerAwaitMessage]\t Message received, with length " + lastMessage.length());
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "[ClientHandlerAwaitMessage]\t Message received, with length " + lastMessage.length());
-
     };
+
+    public String getLastMessage(){
+        return lastMessage;
+    }
 
     Thread awaitMessageThread = new Thread(awaitMessage, "Await message");
 
@@ -54,7 +57,8 @@ public class ClientHandler extends Thread {
      */
     public ClientHandler(Socket socket, UserAuth ua) throws ClientHandlerException {
         super();
-        LOGGER.log(Level.INFO, "[ClientHandler] New socket detected with IP {0}. Creating ClientHandler", socket.getInetAddress());
+        LOGGER.log(Level.INFO, "[ClientHandler] New socket detected with IP {0}. Creating ClientHandler",
+                socket.getInetAddress());
         this.socket = socket;
         userauth = ua;
 
