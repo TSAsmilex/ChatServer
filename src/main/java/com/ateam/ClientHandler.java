@@ -7,7 +7,7 @@ package com.ateam;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayDeque;
 import java.util.logging.Level;
@@ -24,7 +24,7 @@ public class ClientHandler extends Thread {
 
     Socket socket;
     BufferedReader reader;
-    PrintStream writer;
+    PrintWriter writer;
 
     Runnable awaitMessage = () -> {
         System.out.println("[ClientHandler]\t Awaiting message");
@@ -62,14 +62,14 @@ public class ClientHandler extends Thread {
         }
 
         try {
-            writer = new PrintStream(socket.getOutputStream());
+            writer = new PrintWriter(socket.getOutputStream());
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "[ClientHandler]\t PrintStream failed", e);
             throw new ClientHandlerException("Failure in ClientHandler. Cannot build object.");
         }
     }
 
-    public ClientHandler(Socket socket, BufferedReader reader, PrintStream writer) {
+    public ClientHandler(Socket socket, BufferedReader reader, PrintWriter writer) {
         super();
         this.socket = socket;
         this.reader = reader;

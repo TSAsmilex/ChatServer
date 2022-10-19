@@ -5,7 +5,7 @@
 package com.ateam;
 
 import java.io.BufferedReader;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import org.junit.Test;
@@ -53,7 +53,7 @@ public class ClientHandlerTest {
     public void testSendMessage() throws Exception {
         // GIVEN
         System.out.println("sendMessage");
-        PrintStream testWriter = Mockito.mock(PrintStream.class);
+        PrintWriter testWriter = Mockito.mock(PrintWriter.class);
         BufferedReader testReader = Mockito.mock(BufferedReader.class);
         Socket socket = Mockito.mock(Socket.class);
 
@@ -79,7 +79,7 @@ public class ClientHandlerTest {
     public void testCheckPendingMessages() throws ClientHandlerException {
         // GIVEN
         System.out.println("checkPendingMessages");
-        PrintStream testWriter = Mockito.mock(PrintStream.class);
+        PrintWriter testWriter = Mockito.mock(PrintWriter.class);
         BufferedReader testReader = Mockito.mock(BufferedReader.class);
         Socket socket = Mockito.mock(Socket.class);
         ClientHandler instance = new ClientHandler(socket, testReader, testWriter);
@@ -91,5 +91,4 @@ public class ClientHandlerTest {
         // EXPECT
         assertEquals(expResult, result);
     }
-
 }

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.BufferedReader;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 
@@ -33,8 +34,8 @@ public class ServerTest {
         BufferedReader testReader1 = Mockito.mock(BufferedReader.class);
         BufferedReader testReader2 = Mockito.mock(BufferedReader.class);
 
-        PrintStream testWriter1 = Mockito.mock(PrintStream.class);
-        PrintStream testWriter2 = Mockito.mock(PrintStream.class);
+        PrintWriter testWriter1 = Mockito.mock(PrintWriter.class);
+        PrintWriter testWriter2 = Mockito.mock(PrintWriter.class);
 
         ClientHandler testClient1 = new ClientHandler(testSocket1, testReader1, testWriter1);
         ClientHandler testClient2 = new ClientHandler(testSocket2, testReader2, testWriter2);
