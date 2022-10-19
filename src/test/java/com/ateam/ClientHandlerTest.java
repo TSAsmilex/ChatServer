@@ -28,7 +28,7 @@ public class ClientHandlerTest {
     /**
      * Test of awaitMessage method, of class ClientHandler.
      */
-    @Test(timeout = 2000)
+    @Test(timeout = 4000)
     public void testAwaitMessage() throws Exception {
         System.out.println("awaitMessage");
         Socket socket = Mockito.mock(Socket.class);
@@ -40,7 +40,7 @@ public class ClientHandlerTest {
         instance.awaitMessageThread.start();
 
         while (instance.getLastMessage().equals("")) {
-
+            Thread.sleep(100);
         }
 
         assertEquals("Hello", instance.getLastMessage());
