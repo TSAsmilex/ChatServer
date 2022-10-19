@@ -71,6 +71,7 @@ public class Server {
                 if (!client.isConnected()) {
                     LOGGER.info("[Server]\tClient disconnected. Removing from pool");
                     client.close();
+                    client.interrupt();
                     clients.remove(client);
                 }
                 if (client.checkPendingMessages()) {
