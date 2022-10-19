@@ -34,14 +34,15 @@ public class ClientHandler extends Thread {
     private User user;
 
     Runnable awaitMessage = () -> {
-        System.out.println("[ClientHandler]\t Awaiting message");
+        Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "[ClientHandler]\t Awaiting message");
 
         try {
             lastMessage = reader.readLine();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("[ClientHandlerAwaitMessage]\t Message received, with length " + lastMessage.length());
+        Logger.getLogger(ClientHandler.class.getName()).log(Level.INFO, "[ClientHandlerAwaitMessage]\t Message received, with length " + lastMessage.length());
+
     };
 
     Thread awaitMessageThread = new Thread(awaitMessage, "Await message");
@@ -107,7 +108,6 @@ public class ClientHandler extends Thread {
      *
      */
     public void sendMessage(String message) {
-        System.out.println("enviando: " + message);
         try {
             // Send response to client
             writer.println(message);
