@@ -218,4 +218,9 @@ public class ClientHandler extends Thread {
             LOGGER.log(Level.SEVERE, "[ClientHandler]\t Error closing thread.", e);
         }
     }
+
+
+    public String getUsername() {
+        return this.user == null? "" : this.user.getUsername();
+    }
 }

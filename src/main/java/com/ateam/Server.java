@@ -45,6 +45,13 @@ public class Server {
             LOGGER.log(Level.SEVERE, "[Server] Error creating server socket", e);
         }
 
+        try {
+            db.loadDB();
+        }
+        catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "[Server] Error loading database", e);
+        }
+
         this.userAuth = new UserAuth(db);
     }
 
@@ -101,7 +108,7 @@ public class Server {
 
             for (var otherClient: otherClients) {
                 LOGGER.info("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
-                otherClient.sendMessage(message);
+                otherClient.sendMessage("[" + client.getUsername() + "] " + message);
             }
         }
     }
