@@ -46,7 +46,7 @@ public class Server {
         }
 
         this.userAuth = new UserAuth(db);
-        ChatsRooms.put("General", clients);
+        ChatsRooms.put("general", clients);
     }
 
     /**
@@ -126,7 +126,7 @@ public class Server {
         for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : ChatsRooms.entrySet()) {
             String key = chatroom.getKey();
             //If exists, add the client to the array
-            if (key.equalsIgnoreCase(roomname)) {
+            if (key.equals(roomname.toLowerCase())) {
                 
                 chatroom.getValue().add(client);
                 found = true;
@@ -137,19 +137,19 @@ public class Server {
         if (found==false){
            ArrayList<ClientHandler> chatRoomClient = new ArrayList<>();
            chatRoomClient.add(client);
-            ChatsRooms.put(roomname, chatRoomClient);
+            ChatsRooms.put(roomname.toLowerCase(), chatRoomClient);
             LOGGER.info(roomname+ " has been created");
         }
         
     }
     
     public void listRoom(ClientHandler client){
-        String chatslist="";
+        String chatslist="Rooms avaliable: ";
         for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : ChatsRooms.entrySet()) {
             String key = chatroom.getKey();
             ArrayList value = chatroom.getValue();
             
-         chatslist += key +"[" + value.size()+"]\n";
+         chatslist += " ("+ key +"[" + value.size()+"])  ";
         }
         client.sendMessage(chatslist);
         LOGGER.info(chatslist);
@@ -157,7 +157,7 @@ public class Server {
     
     public void leaveRoom(ClientHandler client){
         removeClient(client);
-        ChatsRooms.get("General").add(client);
+        ChatsRooms.get("general").add(client);
         LOGGER.info(client.getName()+" left from the current room");
                 
     }
@@ -171,7 +171,7 @@ public class Server {
             if (value.contains(client)){
                 value.remove(client);
                 LOGGER.info(client.getName()+" removed from "+ key);
-                if (value.isEmpty() && (!chatroom.equals(ChatsRooms.get("General"))))
+                if (value.isEmpty() && (!chatroom.equals(ChatsRooms.get("general"))))
                     ChatsRooms.remove(key);
                 LOGGER.info(key+" room deleted");
             }
