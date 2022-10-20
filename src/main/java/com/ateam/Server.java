@@ -4,9 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -74,35 +73,50 @@ public class Server {
 
             disconnectOfflineClients();
 
-            var command = Command.NOOP;
+            var clientsWithCommands = new ArrayList<ClientHandler>();
 
-            for (var client : clients) {
-                if (client.checkPendingMessages()) {
-                    // LOGGER.info("[Server]\t Pending messages to be sent");
+            for (var room: rooms) {
+                clientsWithCommands.addAll(room.getUsers().stream()
+                    .filter(c -> c.checkPendingMessages() && Command.parseCommand(c.peekLastMessage()) != Command.NOOP)
+                    .toList()
+                );
+            }
 
-                    var lastMessage = client.getLastMessage();
-                    command = Command.parseCommand(lastMessage);
+            Iterator<ClientHandler> it = clientsWithCommands.iterator();
 
-                    if (command != Command.NOOP) {
+            while (it.hasNext()) {
+                var client = it.next();
 
-                        switch (command) {
-                            case JOIN -> {
-                                var parseMsg = Arrays.asList(lastMessage.toLowerCase().split(" "));
-                                var room = "";
-                                if (parseMsg.size() > 1) {
-                                    room = parseMsg.get(1);
-                                    joinRoom(room, client);
-                                } else {
-                                    // Quéjate de que no has puesto bien el comando.
-                                }
-                            }
-                            case LEAVE -> leaveRoom(client);
-                            case LIST -> listRoom(client);
+                var lastMessage = client.getLastMessage();
+                var command = Command.parseCommand(lastMessage);
+
+                switch (command) {
+                    case JOIN -> {
+                        var parseMsg = Arrays.asList(lastMessage.toLowerCase().split(" "));
+                        var room = "";
+                        if (parseMsg.size() > 1) {
+                            room = parseMsg.get(1);
+                            joinRoom(room, client);
+                        } else {
+                            client.sendMessage("Please specify a room to join (e.g. /join general");
                         }
-                    } else {
-                        broadcast(client);
                     }
+                    case LEAVE -> leaveRoom(client);
+                    case LIST -> listRoom(client);
                 }
+            }
+
+
+            var clientsWithMessages = new ArrayList<ClientHandler>();
+            for (var room: rooms) {
+                clientsWithMessages.addAll(room.getUsers().stream()
+                    .filter(c -> c.checkPendingMessages() && Command.parseCommand(c.peekLastMessage()) == Command.NOOP)
+                    .toList()
+                );
+            }
+
+            for (var client: clientsWithMessages) {
+                broadcast(client);
             }
 
             Thread.sleep(1000);
@@ -110,12 +124,11 @@ public class Server {
     }
 
     /**
-     * Send a message to all clients
+     * Send a message to all clients in the same room.
      *
      * @param client
      * @throws com.ateam.ClientHandlerException
      */
-    // Broadcast should use the client instead of the messages
     public void broadcast(ClientHandler client) throws ClientHandlerException {
         LOGGER.info("[Server]\t Broadcasting messages");
 
@@ -189,10 +202,16 @@ public class Server {
 
         if (room.isPresent()) {
             room.get().add(client);
+            client.sendMessage("You have joined " + room.get().getRoomName()
+                + ". There are " + room.get().getUsers().size() + " users online."
+            );
         } else {
             var newRoom = new ChatRoom(roomname);
             newRoom.add(client);
             this.rooms.add(newRoom);
+            client.sendMessage("You have joined " + newRoom.getRoomName()
+                + ". There are currently no more users online."
+            );
         }
     }
 
@@ -205,7 +224,7 @@ public class Server {
         String chatslist = "Rooms avaliable: ";
 
         for (var room : rooms) {
-            chatslist += room.getRoomName() + " (" + room.size() + ") ";
+            chatslist += room.getRoomName() + "(" + room.size() + ") ";
         }
 
         client.sendMessage(chatslist);
@@ -220,7 +239,7 @@ public class Server {
     public void leaveRoom(ClientHandler client) {
         joinRoom("general", client);
         client.sendMessage("You left the current room. You are now in general");
-        LOGGER.info("[Server]\t" + client.getName() + " left from the current room");
+        LOGGER.info("[Server]\t" + client.getUsername() + " left the current room");
     }
 
     /**

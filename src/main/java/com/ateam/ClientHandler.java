@@ -139,7 +139,7 @@ public class ClientHandler extends Thread {
     public void sendMessage(String message) {
         try {
             // Send response to client
-            LOGGER.info("Sending message + " + message + " to client " + socket.getInetAddress() + ".");
+            LOGGER.info("Sending message + \"" + message + "\" to client " + socket.getInetAddress() + ".");
             writer.println(message);
             writer.flush();
         } catch (Exception e) {

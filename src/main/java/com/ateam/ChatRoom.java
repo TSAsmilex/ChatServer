@@ -12,7 +12,7 @@ import java.util.ArrayList;
  */
 public class ChatRoom {
     private String name;
-    private ArrayList<ClientHandler> clientList;
+    private ArrayList<ClientHandler> clientList = new ArrayList<>();
 
     public ChatRoom(String name) {
         this.name = name;
