@@ -91,6 +91,9 @@ public class Server {
                                     room = parseMsg.get(1);
                                     joinRoom(room, client);
                                 }
+                                else {
+                                    // Quéjate de que no has puesto bien el comando.
+                                }
                             }
                             case LEAVE -> leaveRoom(client);
                             case LIST  -> listRoom(client);
