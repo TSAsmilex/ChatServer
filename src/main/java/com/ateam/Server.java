@@ -38,6 +38,9 @@ public class Server {
     };
     Thread awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
 
+    /**
+     *
+     */
     public Server() {
         try {
             ss = new ServerSocket(PORT);
@@ -88,7 +91,8 @@ public class Server {
     /**
      * Send a message to all clients
      *
-     * @param messages queue of messages to be sent
+     * @param client
+     * @throws com.ateam.ClientHandlerException
      */
     // Broadcast should use the client instead of the messages
     public void broadcast(ClientHandler client) throws ClientHandlerException {
@@ -107,6 +111,12 @@ public class Server {
         }
     }
 
+    /**
+     *
+     * @param socket
+     * @param ua
+     * @throws ClientHandlerException
+     */
     public void addNewClientHandler(Socket socket, UserAuth ua) throws ClientHandlerException {
         ClientHandler client = new ClientHandler(socket, ua);
         this.socket = null;
@@ -114,10 +124,20 @@ public class Server {
         client.start();
     }
 
+    /**
+     *
+     * @return
+     */
     public ArrayList<ClientHandler> getClients() {
         return clients;
     }
 
+    
+    /**
+     * Move the client to a room selected, if not exists, create one.
+     * @param roomname
+     * @param client 
+     */
     public void joinRoom(String roomname, ClientHandler client) {
         removeClient(client);
 
@@ -143,8 +163,12 @@ public class Server {
         
     }
     
+    /**
+     *List all the rooms available to a client
+     * @param client
+     */
     public void listRoom(ClientHandler client){
-        String chatslist="Rooms avaliable: ";
+        String chatslist="Rooms available: ";
         for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : ChatsRooms.entrySet()) {
             String key = chatroom.getKey();
             ArrayList value = chatroom.getValue();
@@ -155,6 +179,10 @@ public class Server {
         LOGGER.info(chatslist);
     }
     
+    /**
+     *Move the client from the current room to "general"
+     * @param client
+     */
     public void leaveRoom(ClientHandler client){
         removeClient(client);
         ChatsRooms.get("general").add(client);
@@ -162,6 +190,11 @@ public class Server {
                 
     }
     
+    /**
+     *Find the client in all the rooms, remove it from
+     * the current one, delete it if it's empty.
+     * @param client
+     */
     public void removeClient(ClientHandler client){
         //Check all the rooms
         for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : ChatsRooms.entrySet()) {
