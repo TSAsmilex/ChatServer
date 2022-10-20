@@ -82,7 +82,7 @@ public class Server {
                     //LOGGER.info("[Server]\t Pending messages to be sent");
 
                     var lastMessage = client.getLastMessage();
-                    var command = Command.parseCommand(lastMessage);
+                    command = Command.parseCommand(lastMessage);
 
                     if (command != Command.NOOP) {
 
