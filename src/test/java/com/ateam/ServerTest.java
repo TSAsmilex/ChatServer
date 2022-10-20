@@ -46,10 +46,14 @@ public class ServerTest {
 
         testClient1.lastMessage = new String("TEST");
 
+        Thread.sleep(100);
+
         server.broadcast(testClient1);
         testClient2.awaitMessageThread.start();
 
         assertTrue(!testClient1.checkPendingMessages());
-        verify(testWriter1, Mockito.times(1));
+
+        verify(testWriter2, Mockito.times(1))
+            .println("[" + testClient1.getUsername() + "] " + "TEST");
     }
 }
