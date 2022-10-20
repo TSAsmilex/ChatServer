@@ -5,9 +5,11 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /*
  * This class is the server side of the application. It manages multiple connections, waiting for messages to arrive.
@@ -23,17 +25,15 @@ public class Server {
     private UserAuth userAuth;
     private UserDB db = new UserDB();
 
-    private ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();
+    ArrayList<ChatRoom> rooms = new ArrayList<>();
     Socket socket = null;
     ServerSocket ss;
-    private HashMap<String, ArrayList<ClientHandler>> chatRooms = new HashMap<>();
 
     Runnable awaitNewConnections = () -> {
         try {
             LOGGER.info("[Server]\tWaiting for new connections");
             socket = ss.accept();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "[Server]\tError waiting for connections", e);
         }
     };
@@ -50,7 +50,7 @@ public class Server {
         }
 
         this.userAuth = new UserAuth(db);
-        chatRooms.put("general", clients);
+        this.rooms.add(new ChatRoom("general"));
     }
 
     /**
@@ -74,35 +74,32 @@ public class Server {
 
             disconnectOfflineClients();
 
-
             var command = Command.NOOP;
 
-            for (var client: clients) {
+            for (var client : clients) {
                 if (client.checkPendingMessages()) {
-                    //LOGGER.info("[Server]\t Pending messages to be sent");
+                    // LOGGER.info("[Server]\t Pending messages to be sent");
 
                     var lastMessage = client.getLastMessage();
                     command = Command.parseCommand(lastMessage);
 
                     if (command != Command.NOOP) {
 
-                        switch(command) {
+                        switch (command) {
                             case JOIN -> {
                                 var parseMsg = Arrays.asList(lastMessage.toLowerCase().split(" "));
                                 var room = "";
                                 if (parseMsg.size() > 1) {
                                     room = parseMsg.get(1);
                                     joinRoom(room, client);
-                                }
-                                else {
+                                } else {
                                     // Quéjate de que no has puesto bien el comando.
                                 }
                             }
                             case LEAVE -> leaveRoom(client);
-                            case LIST  -> listRoom(client);
+                            case LIST -> listRoom(client);
                         }
-                    }
-                    else {
+                    } else {
                         broadcast(client);
                     }
                 }
@@ -121,21 +118,21 @@ public class Server {
     // Broadcast should use the client instead of the messages
     public void broadcast(ClientHandler client) throws ClientHandlerException {
         LOGGER.info("[Server]\t Broadcasting messages");
+
         var messages = client.getMessages();
+        var room = getRoom(client);
 
         while (!messages.isEmpty()) {
             var message = messages.pop();
 
-            ArrayList<ClientHandler> otherClients = new ArrayList<>();
-
-            for (var key: this.chatRooms.keySet()) {
-                if (chatRooms.get(key).contains(client)) {
-                    otherClients = this.chatRooms.get(key);
-                }
-            }
+            List<ClientHandler> otherClients = room.getUsers().stream()
+                .filter(c -> c != client)
+                .toList();
 
             for (var otherClient : otherClients) {
-                LOGGER.info("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
+                LOGGER.info(
+                        "[Server]\t Sending message \"" + message + "\" to client "
+                                + client.socket.getInetAddress());
                 otherClient.sendMessage("[" + client.getUsername() + "] " + message);
             }
         }
@@ -150,106 +147,105 @@ public class Server {
     public void addNewClientHandler(Socket socket, UserAuth ua) throws ClientHandlerException {
         ClientHandler client = new ClientHandler(socket, ua);
         this.socket = null;
-        clients.add(client);
+
+        for (var room : rooms) {
+            if (room.getRoomName().equals("general")) {
+                room.add(client);
+            }
+        }
+
         client.start();
         LOGGER.info("[Server]\tNew client connected");
     }
 
     /**
+     * Check in which room is a particular client
      *
-     * @return
+     * @param client
+     * @return the room. {@code null} if the client could not be found.
      */
-    public ArrayList<ClientHandler> getClients() {
-        return clients;
-    }
+    public ChatRoom getRoom(ClientHandler client) {
+        for (var room : rooms) {
+            if (room.contains(client)) {
+                return room;
+            }
+        }
 
+        return null;
+    }
 
     /**
      * Move the client to a room selected, if not exists, create one.
+     *
      * @param roomname
      * @param client
      */
     public void joinRoom(String roomname, ClientHandler client) {
-        removeClient(client);
+        getRoom(client).remove(client);
 
-        boolean found= false;
-        //Check if exists a chatroom with the name writed.
-        for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : chatRooms.entrySet()) {
-            String key = chatroom.getKey();
-            //If exists, add the client to the array
-            if (key.equals(roomname.toLowerCase())) {
+        var room = this.rooms.stream()
+                .filter(r -> r.getRoomName().equals(roomname))
+                .findFirst();
 
-                chatroom.getValue().add(client);
-                found = true;
-                LOGGER.info(client.getName()+" has joined to "+ roomname);
-            }
+        if (room.isPresent()) {
+            room.get().add(client);
+        } else {
+            var newRoom = new ChatRoom(roomname);
+            newRoom.add(client);
+            this.rooms.add(newRoom);
         }
-        //If the chatroom doesn't exists, create a new one and add the client.
-        if (found==false){
-           ArrayList<ClientHandler> chatRoomClient = new ArrayList<>();
-           chatRoomClient.add(client);
-            chatRooms.put(roomname.toLowerCase(), chatRoomClient);
-            LOGGER.info(roomname+ " has been created");
-        }
-
     }
 
-
     /**
-     *List all the rooms available to a client
+     * List all the rooms available to a client
+     *
      * @param client
      */
-    public void listRoom(ClientHandler client){
-        String chatslist="Rooms avaliable: ";
-        for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : chatRooms.entrySet()) {
-            String key = chatroom.getKey();
-            var value = chatroom.getValue();
+    public void listRoom(ClientHandler client) {
+        String chatslist = "Rooms avaliable: ";
 
-         chatslist += " ("+ key +"[" + value.size()+"])  ";
+        for (var room : rooms) {
+            chatslist += room.getRoomName() + " (" + room.size() + ") ";
         }
+
         client.sendMessage(chatslist);
-        LOGGER.info(chatslist);
+        LOGGER.info("[Server]\tList of rooms sent to client " + client.socket.getInetAddress());
     }
-
 
     /**
-     *Move the client from the current room to "general"
-     * @param client
+     * Move the client from the current room to "general".
+     *
+     * @param client ClientHandler to be moved to general.
      */
-    public void leaveRoom(ClientHandler client){
-        removeClient(client);
-        chatRooms.get("general").add(client);
-        LOGGER.info(client.getName()+" left from the current room");
+    public void leaveRoom(ClientHandler client) {
+        joinRoom("general", client);
+        client.sendMessage("You left the current room. You are now in general");
+        LOGGER.info("[Server]\t" + client.getName() + " left from the current room");
     }
-
 
     /**
-     *Find the client in all the rooms, remove it from
-     * the current one, delete it if it's empty.
-     * @param client
+     * Check how many users are currently in a room and remove it if it's empty
      */
-    public void removeClient(ClientHandler client){
-        //Check all the rooms
-        for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : chatRooms.entrySet()) {
-            String key = chatroom.getKey();
-            var value = chatroom.getValue();
-            //Removes the client from the actual one.
-            if (value.contains(client)){
-                value.remove(client);
-                LOGGER.info(client.getName()+" removed from "+ key);
-                if (value.isEmpty() && (!chatroom.equals(chatRooms.get("general"))))
-                    chatRooms.remove(key);
-                LOGGER.info(key+" room deleted");
-            }
-        }
+    public void removeEmptyRooms() {
+        var emptyRooms = this.rooms.stream()
+                .filter(r -> r.size() == 0)
+                .collect(Collectors.toList());
+
+        this.rooms.removeAll(emptyRooms);
     }
 
+    /**
+     * Remove all offline clients from the server
+     */
     public void disconnectOfflineClients() {
-        var disconnected = clients.stream().filter(c -> !c.isConnected()).toList();
+        for (var room : rooms) {
+            var disconnected = room.getUsers().stream()
+                    .filter(c -> !c.isConnected())
+                    .toList();
 
-        if (disconnected.size() > 0) {
-            LOGGER.info("[Server]\tRemoving " + disconnected.size() + " disconnected clients");
-            clients.removeAll(disconnected);
+            for (var c : disconnected) {
+                room.remove(c);
+            }
         }
     }
 }
