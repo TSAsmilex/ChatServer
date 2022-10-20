@@ -74,6 +74,9 @@ public class Server {
 
             disconnectOfflineClients();
 
+
+            var command = Command.NOOP;
+
             for (var client: clients) {
                 if (client.checkPendingMessages()) {
                     //LOGGER.info("[Server]\t Pending messages to be sent");
