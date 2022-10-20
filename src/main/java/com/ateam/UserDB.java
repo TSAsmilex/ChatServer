@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import javax.security.auth.login.LoginException;
 
 public class UserDB {
-    private static final String DB_FILEPATH = "./db/user.csv";
+    static final String DB_FILEPATH = "./db/user.csv";
     private static final Logger LOGGER = Logger.getLogger("UserDB");
 
     private HashSet<User> users = new HashSet<>();
