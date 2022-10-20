@@ -47,8 +47,22 @@ public class ClientHandler extends Thread {
         }
     };
 
-    public String getLastMessage(){
+    public String peekLastMessage(){
         return lastMessage.length() > 0 ? lastMessage : messages.peek();
+    }
+
+    public String getLastMessage(){
+        var msg = "";
+
+        if (lastMessage.length() > 0) {
+            msg = new String(lastMessage);
+            lastMessage = "";
+        }
+        else {
+            msg = messages.pop();
+        }
+
+        return msg;
     }
 
     Thread awaitMessageThread = new Thread(awaitMessage, "Await message");
