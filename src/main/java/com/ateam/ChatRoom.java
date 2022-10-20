@@ -5,22 +5,20 @@
 package com.ateam;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 /**
  *
  * @author miromero
  */
 public class ChatRoom {
-
     private String name;
     private ArrayList<ClientHandler> clientList;
 
-    public ChatRoom(String name, ArrayList<ClientHandler> clientList) {
+    public ChatRoom(String name) {
         this.name = name;
     }
 
-    public int getNumberClients() {
+    public int size() {
         return clientList.size();
     }
 
@@ -33,20 +31,20 @@ public class ChatRoom {
     }
 
     public boolean remove(ClientHandler client) {
-        if (isInRoom(client)) {
+        if (contains(client)) {
             clientList.remove(client);
             return true;
 
         }else return false;
 
     }
-    
-    public boolean isInRoom(ClientHandler client){
+
+    public boolean contains(ClientHandler client){
         return clientList.contains(client);
     }
-    
+
     public boolean add(ClientHandler client){
-        if(!isInRoom(client)){
+        if(!contains(client)){
         clientList.add(client);
         return true;
         }else return false;
