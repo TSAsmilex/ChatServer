@@ -217,7 +217,6 @@ public class Server {
         removeClient(client);
         chatRooms.get("general").add(client);
         LOGGER.info(client.getName()+" left from the current room");
-
     }
 
 
