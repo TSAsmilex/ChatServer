@@ -3,6 +3,7 @@ package com.ateam;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -75,8 +76,30 @@ public class Server {
 
             for (var client: clients) {
                 if (client.checkPendingMessages()) {
-                    LOGGER.info("[Server]\t Pending messages to be sent");
-                    broadcast(client);
+                    //LOGGER.info("[Server]\t Pending messages to be sent");
+
+                    var lastMessage = client.getLastMessage();
+                    var command = Command.parseCommand(lastMessage);
+
+                    if (command != Command.NOOP) {
+
+                        switch(command) {
+                            case JOIN -> {
+                                var parseMsg = Arrays.asList(lastMessage.toLowerCase().split(" "));
+                                var room = "";
+                                if (parseMsg.size() > 1) {
+                                    room = parseMsg.get(1);
+                                    joinRoom(room, client);
+                                }
+                            }
+                            case LEAVE -> leaveRoom(client);
+                            case LIST  -> listRoom(client);
+                        }
+
+                    }
+                    else {
+                        broadcast(client);
+                    }
                 }
             }
 

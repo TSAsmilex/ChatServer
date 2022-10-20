@@ -48,7 +48,7 @@ public class ClientHandler extends Thread {
     };
 
     public String getLastMessage(){
-        return lastMessage;
+        return lastMessage.length() > 0 ? lastMessage : messages.peek();
     }
 
     Thread awaitMessageThread = new Thread(awaitMessage, "Await message");
