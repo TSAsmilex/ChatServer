@@ -119,12 +119,15 @@ public class Server {
     }
 
     public void joinRoom(String roomname, ClientHandler client) {
+        removeClient(client);
+
         boolean found= false;
         //Check if exists a chatroom with the name writed.
         for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : ChatsRooms.entrySet()) {
             String key = chatroom.getKey();
             //If exists, add the client to the array
             if (key.equalsIgnoreCase(roomname)) {
+                
                 chatroom.getValue().add(client);
                 found = true;
                 LOGGER.info(client.getName()+" has joined to "+ roomname);
@@ -149,9 +152,29 @@ public class Server {
          chatslist += key +"[" + value.size()+"]\n";
         }
         client.sendMessage(chatslist);
+        LOGGER.info(chatslist);
     }
     
     public void leaveRoom(ClientHandler client){
-        
+        removeClient(client);
+        ChatsRooms.get("General").add(client);
+        LOGGER.info(client.getName()+" left from the current room");
+                
+    }
+    
+    public void removeClient(ClientHandler client){
+        //Check all the rooms
+        for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : ChatsRooms.entrySet()) {
+            String key = chatroom.getKey();
+            ArrayList value = chatroom.getValue();
+            //Removes the client from the actual one.
+            if (value.contains(client)){
+                value.remove(client);
+                LOGGER.info(client.getName()+" removed from "+ key);
+                if (value.isEmpty() && (!chatroom.equals(ChatsRooms.get("General"))))
+                    ChatsRooms.remove(key);
+                LOGGER.info(key+" room deleted");
+            }
+        }
     }
 }
