@@ -26,7 +26,7 @@ public class Server {
     private ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();
     Socket socket = null;
     ServerSocket ss;
-    private HashMap<String, ArrayList<ClientHandler>> ChatsRooms = new HashMap<>();
+    private HashMap<String, ArrayList<ClientHandler>> chatRooms = new HashMap<>();
 
     Runnable awaitNewConnections = () -> {
         try {
@@ -50,7 +50,7 @@ public class Server {
         }
 
         this.userAuth = new UserAuth(db);
-        ChatsRooms.put("general", clients);
+        chatRooms.put("general", clients);
     }
 
     /**
@@ -95,7 +95,6 @@ public class Server {
                             case LEAVE -> leaveRoom(client);
                             case LIST  -> listRoom(client);
                         }
-
                     }
                     else {
                         broadcast(client);
@@ -121,7 +120,13 @@ public class Server {
         while (!messages.isEmpty()) {
             var message = messages.pop();
 
-            var otherClients = clients.stream().filter(c -> c != client).toList();
+            ArrayList<ClientHandler> otherClients = new ArrayList<>();
+
+            for (var key: this.chatRooms.keySet()) {
+                if (chatRooms.get(key).contains(client)) {
+                    otherClients = this.chatRooms.get(key);
+                }
+            }
 
             for (var otherClient : otherClients) {
                 LOGGER.info("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
@@ -152,18 +157,18 @@ public class Server {
         return clients;
     }
 
-    
+
     /**
      * Move the client to a room selected, if not exists, create one.
      * @param roomname
-     * @param client 
+     * @param client
      */
     public void joinRoom(String roomname, ClientHandler client) {
         removeClient(client);
 
         boolean found= false;
         //Check if exists a chatroom with the name writed.
-        for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : ChatsRooms.entrySet()) {
+        for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : chatRooms.entrySet()) {
             String key = chatroom.getKey();
             //If exists, add the client to the array
             if (key.equals(roomname.toLowerCase())) {
@@ -177,7 +182,7 @@ public class Server {
         if (found==false){
            ArrayList<ClientHandler> chatRoomClient = new ArrayList<>();
            chatRoomClient.add(client);
-            ChatsRooms.put(roomname.toLowerCase(), chatRoomClient);
+            chatRooms.put(roomname.toLowerCase(), chatRoomClient);
             LOGGER.info(roomname+ " has been created");
         }
 
@@ -189,8 +194,8 @@ public class Server {
      * @param client
      */
     public void listRoom(ClientHandler client){
-        String chatslist="Rooms available: ";
-        for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : ChatsRooms.entrySet()) {
+        String chatslist="Rooms avaliable: ";
+        for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : chatRooms.entrySet()) {
             String key = chatroom.getKey();
             var value = chatroom.getValue();
 
@@ -200,19 +205,19 @@ public class Server {
         LOGGER.info(chatslist);
     }
 
-    
+
     /**
      *Move the client from the current room to "general"
      * @param client
      */
     public void leaveRoom(ClientHandler client){
         removeClient(client);
-        ChatsRooms.get("general").add(client);
+        chatRooms.get("general").add(client);
         LOGGER.info(client.getName()+" left from the current room");
 
     }
 
-    
+
     /**
      *Find the client in all the rooms, remove it from
      * the current one, delete it if it's empty.
@@ -220,15 +225,15 @@ public class Server {
      */
     public void removeClient(ClientHandler client){
         //Check all the rooms
-        for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : ChatsRooms.entrySet()) {
+        for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : chatRooms.entrySet()) {
             String key = chatroom.getKey();
             var value = chatroom.getValue();
             //Removes the client from the actual one.
             if (value.contains(client)){
                 value.remove(client);
                 LOGGER.info(client.getName()+" removed from "+ key);
-                if (value.isEmpty() && (!chatroom.equals(ChatsRooms.get("general"))))
-                    ChatsRooms.remove(key);
+                if (value.isEmpty() && (!chatroom.equals(chatRooms.get("general"))))
+                    chatRooms.remove(key);
                 LOGGER.info(key+" room deleted");
             }
         }
