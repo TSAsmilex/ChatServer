@@ -39,7 +39,7 @@ public class ClientHandler extends Thread {
             lastMessage = reader.readLine();
             LOGGER.info("[ClientHandler]\tMessage received with size " + lastMessage.length() + ".");
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             LOGGER.info("[ClientHandler]\tClient has likely disconnected.");
         }
     };
@@ -140,50 +140,14 @@ public class ClientHandler extends Thread {
     public void run() {
         // while the user isn't logged.
         while (true) {
+            // The client might disconnect at any point. If that happens,
+            // we cut off the execution early.
+            if (!isConnected()) {
+                break;
+            }
+
             if (!logged) {
-                sendMessage("Welcome. Please login or register in order to continue.");
-
-                String action = "";
-                try {
-                    action = reader.readLine().toLowerCase().trim();
-                    LOGGER.info("[ClientHandler]\tReceived " + action);
-                } catch (IOException ex) {
-                    LOGGER.info("[ClientHandler]\tError reading from socket. It is possible that the client has disconnected.");
-                    break;
-                }
-
-                if (action.equalsIgnoreCase("login") || action.equalsIgnoreCase("register")) {
-                    //We ask the username and the pass.
-                    try {
-                        sendMessage("User: ");
-                        String username = reader.readLine();
-                        sendMessage("Password: ");
-                        String pass = reader.readLine();
-
-                        LOGGER.info("[ClientHandler]\tReceived credentials " + username + ", " + pass);
-
-                        if (action.equalsIgnoreCase("login")) {
-                            //Check if the user exists with the username/pass getted.
-                            this.user = userauth.login(username, pass);
-                            LOGGER.info("[ClientHandler]\tUser " + username + " logged in correctly.");
-                        } else {
-                            //Check if the user exists with the username/pass getted.
-                            this.user = userauth.registerUser(username, pass);
-                            LOGGER.info("[ClientHandler]\tUser " + username + " registered correctly.");
-                        }
-                        logged = true;
-
-                        //If the credentiales don't match with login(), throws an exception and we catch here.
-                        sendMessage("successful");
-                    } catch (LoginException e) {
-                        Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, "Login error", e);
-                        sendMessage("error");
-                    } catch (IOException ex) {
-                        LOGGER.severe("[ClientHandler]\tFail to read the line from client");
-                    }
-                } else {
-                    sendMessage("Please introduce \"login\" or \"register\".");
-                }
+                setupAccount();
             } //if the user is logged
             else {
                 // If there are no messages pending => wake up a thread to await for a new one
@@ -237,5 +201,51 @@ public class ClientHandler extends Thread {
 
     public String getUsername() {
         return this.user == null? "" : this.user.getUsername();
+    }
+
+
+    public void setupAccount() {
+        sendMessage("Welcome. Please login or register in order to continue.");
+
+        String action = "";
+        try {
+            action = reader.readLine().toLowerCase().trim();
+            LOGGER.info("[ClientHandler]\tReceived " + action);
+        } catch (IOException ex) {
+            LOGGER.info("[ClientHandler]\tError reading from socket. It is possible that the client has disconnected.");
+        }
+
+        if (action.equalsIgnoreCase("login") || action.equalsIgnoreCase("register")) {
+            //We ask the username and the pass.
+            try {
+                sendMessage("User: ");
+                String username = reader.readLine();
+                sendMessage("Password: ");
+                String pass = reader.readLine();
+
+                LOGGER.info("[ClientHandler]\tReceived credentials " + username + ", " + pass);
+
+                if (action.equalsIgnoreCase("login")) {
+                    //Check if the user exists with the username/pass getted.
+                    this.user = userauth.login(username, pass);
+                    LOGGER.info("[ClientHandler]\tUser " + username + " logged in correctly.");
+                } else {
+                    //Check if the user exists with the username/pass getted.
+                    this.user = userauth.registerUser(username, pass);
+                    LOGGER.info("[ClientHandler]\tUser " + username + " registered correctly.");
+                }
+                logged = true;
+
+                //If the credentiales don't match with login(), throws an exception and we catch here.
+                sendMessage("successful");
+            } catch (LoginException e) {
+                Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, "Login error", e);
+                sendMessage("error");
+            } catch (IOException ex) {
+                LOGGER.severe("[ClientHandler]\tFail to read the line from client");
+            }
+        } else {
+            sendMessage("Please introduce \"login\" or \"register\".");
+        }
     }
 }
