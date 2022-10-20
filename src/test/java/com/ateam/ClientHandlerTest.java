@@ -4,14 +4,14 @@
  */
 package com.ateam;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
 import java.io.BufferedReader;
-
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import org.junit.Test;
 import org.mockito.Mockito;
+
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,24 +21,29 @@ import static org.mockito.Mockito.when;
  * @author pferna12
  */
 public class ClientHandlerTest {
-    
+
     public ClientHandlerTest() {
     }
 
     /**
      * Test of awaitMessage method, of class ClientHandler.
      */
-    @Test
+    @Test(timeout = 4000)
     public void testAwaitMessage() throws Exception {
-//        // GIVEN
-//        System.out.println("awaitMessage");
-//        Socket socket = null;
-//        //ClientHandler instance = new ClientHandler(socket);
-//
-//        // THEN
-//        //instance.awaitMessage();
-//        // EXPECT
-//        assertEquals(instance, this);
+        System.out.println("awaitMessage");
+        Socket socket = Mockito.mock(Socket.class);
+        BufferedReader reader = Mockito.mock(BufferedReader.class);
+        when(reader.readLine()).thenReturn("Hello");
+        ClientHandler instance = new ClientHandler(socket, reader, null);
+        System.out.println("Last message: " + instance.getLastMessage());
+
+        instance.awaitMessageThread.start();
+
+        while (instance.getLastMessage().equals("")) {
+            Thread.sleep(100);
+        }
+
+        assertEquals("Hello", instance.getLastMessage());
     }
 
     /**
@@ -51,13 +56,13 @@ public class ClientHandlerTest {
         PrintWriter testWriter = Mockito.mock(PrintWriter.class);
         BufferedReader testReader = Mockito.mock(BufferedReader.class);
         Socket socket = Mockito.mock(Socket.class);
-  
+
         InetAddress addr = InetAddress.getByName("127.0.0.1");
         when(socket.getInetAddress()).thenReturn(addr);
-   
+
         ClientHandler instance = new ClientHandler(socket, testReader, testWriter);
 
-        //THEN
+        // THEN
         instance.sendMessage("Hola mundo");
 
         // EXPECT
@@ -67,67 +72,23 @@ public class ClientHandlerTest {
 
     /**
      * Test of checkPendingMessages method, of class ClientHandler.
+     *
+     * @throws ClientHandlerException
      */
-//    @Test
-//    public void testCheckPendingMessages() {
-//         GIVEN
-//        System.out.println("checkPendingMessages");
-//        ClientHandler instance = null;
-//        boolean expResult = false;
-//
-//          THEN
-//        boolean result = instance.checkPendingMessages();
-//
-//         EXPECT
-//        assertEquals(expResult, result);
-//         TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of getMessages method, of class ClientHandler.
-//     */
-//    @Test
-//    public void testGetMessages() throws IOException {
-//        
-//    }
-//
-//    /**
-//     * Test of run method, of class ClientHandler.
-//     */
-//    @Test
-//    public void testRun() {
-//        System.out.println("run");
-//        ClientHandler instance = null;
-//        instance.run();
-//         TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of isConnected method, of class ClientHandler.
-//     */
-//    @Test
-//    public void testIsConnected() {
-//        System.out.println("isConnected");
-//        ClientHandler instance = null;
-//        boolean expResult = false;
-//        boolean result = instance.isConnected();
-//        assertEquals(expResult, result);
-//         TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of close method, of class ClientHandler.
-//     */
-//    @Test
-//    public void testClose() throws Exception {
-//        System.out.println("close");
-//        ClientHandler instance = null;
-//        instance.close();
-//         TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-    
+    @Test
+    public void testCheckPendingMessages() throws ClientHandlerException {
+        // GIVEN
+        System.out.println("checkPendingMessages");
+        PrintWriter testWriter = Mockito.mock(PrintWriter.class);
+        BufferedReader testReader = Mockito.mock(BufferedReader.class);
+        Socket socket = Mockito.mock(Socket.class);
+        ClientHandler instance = new ClientHandler(socket, testReader, testWriter);
+
+        // THEN
+        boolean expResult = false;
+        boolean result = instance.checkPendingMessages();
+
+        // EXPECT
+        assertEquals(expResult, result);
+    }
 }
