@@ -17,8 +17,7 @@ import java.util.logging.Logger;
  * @author pferna12
  */
 public class Server {
-
-    private static final Logger LOGGER = Logger.getLogger("Waiting for new connections");
+    private static final Logger LOGGER = Logger.getLogger("Server");
     final int PORT = 49080;
     private UserAuth userAuth;
     private UserDB db = new UserDB();
@@ -32,8 +31,9 @@ public class Server {
         try {
             LOGGER.info("[Server]\tWaiting for new connections");
             socket = ss.accept();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "[Server] Error waiting for connections", e);
+        }
+        catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "[Server]\tError waiting for connections", e);
         }
     };
     Thread awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
@@ -45,7 +45,7 @@ public class Server {
         try {
             ss = new ServerSocket(PORT);
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "[Server] Error creating server socket", e);
+            LOGGER.log(Level.SEVERE, "[Server]\tThe server socket could not be initialized.", e);
         }
 
         this.userAuth = new UserAuth(db);
@@ -58,7 +58,7 @@ public class Server {
      * @throws Exception
      */
     public void run() throws Exception {
-        LOGGER.info("[Server] TCP Server is starting up, listening at port " + PORT + ".");
+        LOGGER.info("[Server]\tTCP Server is starting up, listening at port " + PORT + ".");
 
         while (true) {
             // Setup new connections
@@ -71,13 +71,9 @@ public class Server {
                 awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
             }
 
-            for (var client : clients) {
-                if (!client.isConnected()) {
-                    LOGGER.info("[Server]\tClient disconnected. Removing from pool");
-                    client.close();
-                    client.interrupt();
-                    clients.remove(client);
-                }
+            disconnectOfflineClients();
+
+            for (var client: clients) {
                 if (client.checkPendingMessages()) {
                     LOGGER.info("[Server]\t Pending messages to be sent");
                     broadcast(client);
@@ -106,7 +102,7 @@ public class Server {
 
             for (var otherClient : otherClients) {
                 LOGGER.info("[Server]\t Sending message \"" + message + "\" to client " + client.socket.getInetAddress());
-                otherClient.sendMessage(message);
+                otherClient.sendMessage("[" + client.getUsername() + "] " + message);
             }
         }
     }
@@ -122,6 +118,7 @@ public class Server {
         this.socket = null;
         clients.add(client);
         client.start();
+        LOGGER.info("[Server]\tNew client connected");
     }
 
     /**
@@ -147,7 +144,7 @@ public class Server {
             String key = chatroom.getKey();
             //If exists, add the client to the array
             if (key.equals(roomname.toLowerCase())) {
-                
+
                 chatroom.getValue().add(client);
                 found = true;
                 LOGGER.info(client.getName()+" has joined to "+ roomname);
@@ -160,9 +157,10 @@ public class Server {
             ChatsRooms.put(roomname.toLowerCase(), chatRoomClient);
             LOGGER.info(roomname+ " has been created");
         }
-        
+
     }
-    
+
+
     /**
      *List all the rooms available to a client
      * @param client
@@ -171,13 +169,14 @@ public class Server {
         String chatslist="Rooms available: ";
         for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : ChatsRooms.entrySet()) {
             String key = chatroom.getKey();
-            ArrayList value = chatroom.getValue();
-            
+            var value = chatroom.getValue();
+
          chatslist += " ("+ key +"[" + value.size()+"])  ";
         }
         client.sendMessage(chatslist);
         LOGGER.info(chatslist);
     }
+
     
     /**
      *Move the client from the current room to "general"
@@ -187,8 +186,9 @@ public class Server {
         removeClient(client);
         ChatsRooms.get("general").add(client);
         LOGGER.info(client.getName()+" left from the current room");
-                
+
     }
+
     
     /**
      *Find the client in all the rooms, remove it from
@@ -199,7 +199,7 @@ public class Server {
         //Check all the rooms
         for (Map.Entry<String, ArrayList<ClientHandler>> chatroom : ChatsRooms.entrySet()) {
             String key = chatroom.getKey();
-            ArrayList value = chatroom.getValue();
+            var value = chatroom.getValue();
             //Removes the client from the actual one.
             if (value.contains(client)){
                 value.remove(client);
@@ -208,6 +208,15 @@ public class Server {
                     ChatsRooms.remove(key);
                 LOGGER.info(key+" room deleted");
             }
+        }
+    }
+
+    public void disconnectOfflineClients() {
+        var disconnected = clients.stream().filter(c -> !c.isConnected()).toList();
+
+        if (disconnected.size() > 0) {
+            LOGGER.info("[Server]\tRemoving " + disconnected.size() + " disconnected clients");
+            clients.removeAll(disconnected);
         }
     }
 }
