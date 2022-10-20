@@ -180,6 +180,7 @@ Capulla
 Capullo
 Capuyo
 Cara de cona
+cara anchoa
 Carabassa
 Caracabello
 Caracandao
@@ -237,6 +238,7 @@ Chavacana
 Chavacano
 Chavea
 Cheo de moscas
+mongolo
 Chichon
 Chimpa
 Chimpajosé
@@ -428,6 +430,7 @@ Horripilante
 Huelebragas
 Huevon
 Huevón
+Frances
 Idiota
 Ignorante
 Imbecil
@@ -801,7 +804,7 @@ Tontolculo
 Tontolhaba
 Tontoligo
 Tontoloscojones
-Tontopolla
+Tontopollas
 Tontoprofundo
 Tontucio
 Torra collons
@@ -876,3 +879,5 @@ Zurcemierdas
 Zurmaco
 Zurremierdas
 Zángano
+Hombreflorero
+Chupapollas
