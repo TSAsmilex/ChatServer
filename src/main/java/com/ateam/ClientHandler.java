@@ -47,8 +47,22 @@ public class ClientHandler extends Thread {
         }
     };
 
+    public String peekLastMessage(){
+        return lastMessage.length() > 0 ? lastMessage : messages.peek();
+    }
+
     public String getLastMessage(){
-        return lastMessage;
+        var msg = "";
+
+        if (lastMessage.length() > 0) {
+            msg = new String(lastMessage);
+            lastMessage = "";
+        }
+        else {
+            msg = messages.pop();
+        }
+
+        return msg;
     }
 
     Thread awaitMessageThread = new Thread(awaitMessage, "Await message");
@@ -125,7 +139,7 @@ public class ClientHandler extends Thread {
     public void sendMessage(String message) {
         try {
             // Send response to client
-            LOGGER.info("Sending message + " + message + " to client " + socket.getInetAddress() + ".");
+            LOGGER.info("Sending message + \"" + message + "\" to client " + socket.getInetAddress() + ".");
             writer.println(message);
             writer.flush();
         } catch (Exception e) {

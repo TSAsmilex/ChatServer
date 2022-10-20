@@ -1,5 +1,6 @@
 package com.ateam;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.util.logging.Logger;
@@ -44,6 +45,12 @@ public class UserAuth {
 
         if (!userDB.addUser(user)) {
             throw new LoginException("User already exists in the database");
+        }
+
+        try {
+            userDB.writeDB(UserDB.DB_FILEPATH);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return user;
