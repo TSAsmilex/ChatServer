@@ -15,7 +15,10 @@ import java.util.logging.Logger;
 import javax.security.auth.login.LoginException;
 
 /**
+ * A class handling the connection of a client. It is responsible for reading, writing and
+ * checking if the connection is alive.
  *
+ * The main method of this class is `run()`, which loops forever, waiting for messages.
  */
 public class ClientHandler extends Thread {
 
@@ -79,6 +82,13 @@ public class ClientHandler extends Thread {
     }
 
 
+    /**
+     * Constructor of the class. Assumes that the parameters have been properly initialized.
+     *
+     * @param socket The socket to be used for the communication.
+     * @param reader The BufferedReader to be used for the communication.
+     * @param writer The PrintWriter to be used for the communication.
+     */
     public ClientHandler(Socket socket, BufferedReader reader, PrintWriter writer) {
         super();
         this.socket = socket;
@@ -134,7 +144,7 @@ public class ClientHandler extends Thread {
     }
 
     /**
-     * main method
+     * Runnable method. Loops over and over, waiting for messages and responding to petitions.
      */
     @Override
     public void run() {
@@ -172,9 +182,9 @@ public class ClientHandler extends Thread {
     }
 
     /**
-     * check connection
-     *
-     * @return
+     * Check if the client is connected and/or the socket has been closed.
+     * @return true if the connection is alive
+     * @see https://www.alpharithms.com/detecting-client-disconnections-java-sockets-091416/
      */
     public boolean isConnected() {
         try {
@@ -184,6 +194,7 @@ public class ClientHandler extends Thread {
             return false;
         }
     }
+
 
     /**
      * close existing connection
@@ -199,11 +210,19 @@ public class ClientHandler extends Thread {
     }
 
 
+    /**
+     * Get the username of the client
+     * @return the username
+     */
     public String getUsername() {
         return this.user == null? "" : this.user.getUsername();
     }
 
 
+    /**
+     * Handle the setup of the account, managing whether the user is already registered or not.
+     *
+     */
     public void setupAccount() {
         sendMessage("Welcome. Please login or register in order to continue.");
 
