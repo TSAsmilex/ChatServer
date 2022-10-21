@@ -22,7 +22,7 @@ public class UserAuth {
     }
 
 
-    public User login (String username, String password) throws LoginException {
+    public User login (String username, String password) throws LoginException, UserBannedException {
         String hashedPassword = getSHA512(password);
 
         User user = null;
@@ -33,7 +33,11 @@ public class UserAuth {
         catch (LoginException e) {
             LOGGER.warning("[UserAuth]\tIncorrect user or/and password");
         }
-
+        
+        if (user.isBanned()) {
+            throw new UserBannedException("User banned");
+        }
+        
         return user;
     }
 

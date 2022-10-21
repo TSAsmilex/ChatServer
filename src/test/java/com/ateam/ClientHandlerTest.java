@@ -35,7 +35,9 @@ public class ClientHandlerTest {
         BufferedReader reader = Mockito.mock(BufferedReader.class);
         when(reader.readLine()).thenReturn("Hello");
         ClientHandler instance = new ClientHandler(socket, reader, null);
-        System.out.println("Last message: " + instance.getLastMessage());
+
+        //System.out.println("Last message: " + instance.getLastMessage());
+
         instance.awaitMessageThread.start();
         while (instance.getLastMessage().equals("")) {
             Thread.sleep(100);
