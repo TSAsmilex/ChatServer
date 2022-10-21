@@ -239,6 +239,7 @@ public class ClientHandler extends Thread {
 
     public void warnBadWord() {
         user.substractLives();
+        sendMessage("You have been warned for using a bad word. You have " + user.getLives() + " lives left.");
     }
 
 
@@ -330,6 +331,16 @@ public class ClientHandler extends Thread {
                 setupAccount();
             } //if the user is logged
             else {
+                if (user.isBanned()) {
+                    sendMessage("You are banned.");
+                    try {
+                        this.close();
+                    } catch (ClientHandlerException ex) {
+                        LOGGER.severe("[ClientHandler]\tCould not close the connection");
+                    }
+                    break;
+                }
+
                 // If there are no messages pending => wake up a thread to await for a new one
                 if (lastMessage.isEmpty()) {
                     if (!awaitMessageThread.isAlive()) {

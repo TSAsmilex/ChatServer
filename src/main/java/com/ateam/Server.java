@@ -293,6 +293,12 @@ public class Server {
                 }
 
                 client.warnBadWord();
+
+                try {
+                    db.writeDB(UserDB.DB_FILEPATH);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             filteredMessage += word + " ";
         }
