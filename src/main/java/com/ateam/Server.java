@@ -27,6 +27,7 @@ public class Server {
     ArrayList<ChatRoom> rooms = new ArrayList<>();
     Socket socket = null;
     ServerSocket ss;
+    Badwords bw = new Badwords();
 
     Runnable awaitNewConnections = () -> {
         try {
@@ -39,9 +40,11 @@ public class Server {
     Thread awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
 
     /**
+     * @throws IOException
+     * @throws FileNotFoundException
      *
      */
-    public Server() {
+    public Server(){
         try {
             ss = new ServerSocket(PORT);
         } catch (IOException e) {
@@ -50,6 +53,7 @@ public class Server {
 
         this.userAuth = new UserAuth(db);
         this.rooms.add(new ChatRoom("general"));
+        bw.loadBw();
     }
 
     /**
@@ -136,7 +140,7 @@ public class Server {
         var room = getRoom(client);
 
         while (!messages.isEmpty()) {
-            var message = messages.pop();
+            var message = filterBadword(messages.pop());
 
             List<ClientHandler> otherClients = room.getUsers().stream()
                 .filter(c -> c != client)
@@ -266,5 +270,21 @@ public class Server {
                 room.remove(c);
             }
         }
+    }
+
+    public String filterBadword(String message){
+        String[] words = message.split("\\W+");
+        String filteredMessage = "";
+        for (String word : words) {
+            int wordLenght = word.length();
+            if(bw.getBadwordsList().contains(word.toLowerCase())){
+                word=word.substring(0, 1);
+                for (int i = 1; i < wordLenght; i++) {
+                    word+= "♥";
+                }
+            }
+            filteredMessage += word + " ";
+        }
+        return filteredMessage.trim();
     }
 }
