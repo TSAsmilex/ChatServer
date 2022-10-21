@@ -30,20 +30,17 @@ public class ClientHandlerTest {
      */
     @Test(timeout = 4000)
     public void testAwaitMessage() throws Exception {
-        // System.out.println("awaitMessage");
-        // Socket socket = Mockito.mock(Socket.class);
-        // BufferedReader reader = Mockito.mock(BufferedReader.class);
-        // when(reader.readLine()).thenReturn("Hello");
-        // ClientHandler instance = new ClientHandler(socket, reader, null);
-        // System.out.println("Last message: " + instance.getLastMessage());
-
-        // instance.awaitMessageThread.start();
-
-        // while (instance.getLastMessage().equals("")) {
-        //     Thread.sleep(100);
-        // }
-
-        // assertEquals("Hello", instance.getLastMessage());
+        System.out.println("awaitMessage");
+        Socket socket = Mockito.mock(Socket.class);
+        BufferedReader reader = Mockito.mock(BufferedReader.class);
+        when(reader.readLine()).thenReturn("Hello");
+        ClientHandler instance = new ClientHandler(socket, reader, null);
+        System.out.println("Last message: " + instance.getLastMessage());
+        instance.awaitMessageThread.start();
+        while (instance.getLastMessage().equals("")) {
+            Thread.sleep(100);
+        }
+        assertEquals("Hello", instance.getLastMessage());
     }
 
     /**
@@ -51,23 +48,19 @@ public class ClientHandlerTest {
      */
     @Test
     public void testSendMessage() throws Exception {
-    //     // GIVEN
-    //     System.out.println("sendMessage");
-    //     PrintWriter testWriter = Mockito.mock(PrintWriter.class);
-    //     BufferedReader testReader = Mockito.mock(BufferedReader.class);
-    //     Socket socket = Mockito.mock(Socket.class);
-
-    //     InetAddress addr = InetAddress.getByName("127.0.0.1");
-    //     when(socket.getInetAddress()).thenReturn(addr);
-
-    //     ClientHandler instance = new ClientHandler(socket, testReader, testWriter);
-
-    //     // THEN
-    //     instance.sendMessage("Hola mundo");
-
-    //     // EXPECT
-    //     verify(testWriter, times(1)).println("Hola mundo");
-    //     verify(testReader, times(0)).readLine();
+        // GIVEN
+        System.out.println("sendMessage");
+        PrintWriter testWriter = Mockito.mock(PrintWriter.class);
+        BufferedReader testReader = Mockito.mock(BufferedReader.class);
+        Socket socket = Mockito.mock(Socket.class);
+        InetAddress addr = InetAddress.getByName("127.0.0.1");
+        when(socket.getInetAddress()).thenReturn(addr);
+        ClientHandler instance = new ClientHandler(socket, testReader, testWriter);
+        // THEN
+        instance.sendMessage("Hola mundo");
+        // EXPECT
+        verify(testWriter, times(1)).println("Hola mundo");
+        verify(testReader, times(0)).readLine();
     }
 
     /**
@@ -92,5 +85,4 @@ public class ClientHandlerTest {
         assertEquals(expResult, result);
     }
 
-    
 }
