@@ -37,4 +37,26 @@ public class UserTest {
 
         assert(user1.hashCode() == user2.hashCode());
     }
+    
+    @Test
+    public void testsubstractLivesBan(){
+        User user = new User("Miguel", "123", 0);
+        
+        user.substractLives();
+        
+        assert(user.isBanned());
+        
+    }
+    
+        @Test
+    public void testsubstractLives(){
+        User user = new User("Miguel", "123", 3);
+        
+        user.substractLives();
+        
+        assert(user.getLives() == 2);
+        
+    }
+    
+    
 }
