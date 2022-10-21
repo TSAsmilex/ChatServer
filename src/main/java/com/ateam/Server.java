@@ -29,6 +29,8 @@ public class Server {
     ServerSocket ss;
     Badwords bw = new Badwords();
 
+    
+    //Create a lambda function runnable that waits a new connection
     Runnable awaitNewConnections = () -> {
         try {
             LOGGER.info("[Server]\tWaiting for new connections");
@@ -37,6 +39,7 @@ public class Server {
             LOGGER.log(Level.SEVERE, "[Server]\tError waiting for connections", e);
         }
     };
+    //A new thread for each connection
     Thread awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
 
     /**
@@ -66,11 +69,11 @@ public class Server {
 
         while (true) {
             // Setup new connections
-            if (socket == null) {
+            if (socket == null) { //If no connection
                 if (!awaitNewConnectionsThread.isAlive()) {
                     awaitNewConnectionsThread.start();
                 }
-            } else {
+            } else {// Conection for new socket/client
                 addNewClientHandler(socket, userAuth);
                 awaitNewConnectionsThread = new Thread(awaitNewConnections, "Accept socket");
             }
