@@ -14,16 +14,23 @@ public class Badwords {
     private HashSet<String> badwordsList;
     private static final Logger LOGGER = Logger.getLogger("Badwords");
 
-
-
     public Badwords(){
         badwordsList = new HashSet<>();
     }
 
+    
+    /** 
+     * @return HashSet<String>
+     */
     public HashSet<String> getBadwordsList() {
         return badwordsList;
     }
 
+    
+    /** 
+     * Method to read and populate the badwordsList
+     * @return boolean. True if the method is able to read and populate the badwordsList
+     */
     public boolean loadBw(){
         File txtFile = new File(Badwords.BADWORDS_FILEPATH);
 
