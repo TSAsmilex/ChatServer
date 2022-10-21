@@ -78,8 +78,9 @@ public class UserDB {
 
                 String username = userString[0];
                 String hashedPassword = userString[1];
-
-                User user = new User(username, hashedPassword);
+                String lives= userString[2];                
+                
+                User user = new User(username, hashedPassword, Integer.parseInt(lives));
 
                 this.users.add(user);
             }
@@ -99,8 +100,7 @@ public class UserDB {
                 .map(user -> new String(
                         user.getUsername() + ";"
                     +   user.getHashedPassword() + ";"
-                    +   user.getLives() + ";"
-                    +   user.isBanned()))
+                    +   user.getLives()))
                 .collect(Collectors.joining("\n"));
 
         File csvFile = new File(path);

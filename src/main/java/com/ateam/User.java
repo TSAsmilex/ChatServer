@@ -18,11 +18,14 @@ public class User {
         
     }
     
-        public User (String username, String hashedPassword, int lives, boolean banned) {
+        public User (String username, String hashedPassword, int lives) {
         this.username       = username;
         this.hashedPassword = hashedPassword;
-        this.banned         = banned;
-        this.lives          = lives;
+        this.lives          = Math.max(0, lives);
+        
+        if (lives <= 0) {
+            banned = true;
+        }
         
     }
 
@@ -63,10 +66,11 @@ public class User {
     }
     
     public void substractLifes(){
-    
         if (lives > 0) {            
             lives--;
-        }  else {
+        }  
+        
+        if (lives == 0 ) {
             banned = true;
         }
     }

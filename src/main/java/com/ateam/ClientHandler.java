@@ -171,13 +171,7 @@ public class ClientHandler extends Thread {
             }
 
             if (!logged) {
-                try {
-                    setupAccount();
-                } catch (LoginException ex) {
-                    Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (UserBannedException ex) {
-                    Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                setupAccount();
             } //if the user is logged
             else {
                 // If there are no messages pending => wake up a thread to await for a new one
@@ -243,7 +237,7 @@ public class ClientHandler extends Thread {
      * Handle the setup of the account, managing whether the user is already registered or not.
      *
      */
-    public void setupAccount() throws LoginException, UserBannedException {
+    public void setupAccount() {
         sendMessage("Welcome. Please login or register in order to continue.");
 
         String action = "";
@@ -277,8 +271,19 @@ public class ClientHandler extends Thread {
 
                 //If the credentiales don't match with login(), throws an exception and we catch here.
                 sendMessage("successful");
+            } catch (LoginException e) {
+                LOGGER.info("[ClientHandler]\tLogin error");
+                sendMessage("error");
             } catch (IOException ex) {
                 LOGGER.severe("[ClientHandler]\tFail to read the line from client");
+            } catch (UserBannedException e) {
+                LOGGER.info("[ClientHandler]\tUser is banned");
+                sendMessage("banned");
+                try {
+                    this.close();
+                } catch (ClientHandlerException ex) {
+                    LOGGER.severe("[ClientHandler]\tCould not close the connection");
+                }
             }
         } else {
             sendMessage("Please introduce \"login\" or \"register\".");
