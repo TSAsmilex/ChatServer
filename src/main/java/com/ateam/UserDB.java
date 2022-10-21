@@ -98,7 +98,9 @@ public class UserDB {
         String output = this.users.stream()
                 .map(user -> new String(
                         user.getUsername() + ";"
-                                + user.getHashedPassword()))
+                    +   user.getHashedPassword() + ";"
+                    +   user.getLives() + ";"
+                    +   user.isBanned()))
                 .collect(Collectors.joining("\n"));
 
         File csvFile = new File(path);
@@ -158,7 +160,7 @@ public class UserDB {
 
         if (!user.isPresent()) {
             throw new LoginException("Invalid credentials");
-        }
+        } 
 
         return user.get();
     }

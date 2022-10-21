@@ -22,7 +22,7 @@ public class UserAuth {
     }
 
 
-    public User login (String username, String password) throws LoginException {
+    public User login (String username, String password) throws LoginException, UserBannedException {
         String hashedPassword = getSHA512(password);
 
         User user = null;
@@ -33,12 +33,16 @@ public class UserAuth {
         catch (LoginException e) {
             LOGGER.warning("[UserAuth]\tIncorrect user or/and password");
         }
-
+        
+        if (user.isBanned()) {
+            throw new UserBannedException("User banned");
+        }
+        
         return user;
     }
 
 
-    public User registerUser(String username, String password) throws LoginException {
+    public User registiferUser(String username, String password) throws LoginException {
         String hashedPassword = getSHA512(password);
 
         User user = new User(username, hashedPassword);
@@ -69,5 +73,9 @@ public class UserAuth {
         }
 
         return toReturn;
+    }
+
+    User registerUser(String username, String pass) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
