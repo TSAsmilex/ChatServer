@@ -219,7 +219,7 @@ public class ClientHandler extends Thread {
     /**
      * Check if the client is connected and/or the socket has been closed.
      * @return true if the connection is alive
-     * @see https://www.alpharithms.com/detecting-client-disconnections-java-sockets-091416/
+     *
      */
     public boolean isConnected() {
         try {
@@ -276,26 +276,34 @@ public class ClientHandler extends Thread {
                 sendMessage("Password: ");
                 String pass = reader.readLine();
 
-                LOGGER.info("[ClientHandler]\tReceived credentials " + username + ", " + pass);
+                LOGGER.log(Level.INFO, "[ClientHandler]\tReceived credentials {0}, {1}", new Object[]{username, pass});
 
                 if (action.equalsIgnoreCase("login")) {
                     //Check if the user exists with the username/pass getted.
                     this.user = userauth.login(username, pass);
-                    LOGGER.info("[ClientHandler]\tUser " + username + " logged in correctly.");
+                    LOGGER.log(Level.INFO, "[ClientHandler]\tUser {0} logged in correctly.", username);
                 } else {
                     //Check if the user exists with the username/pass getted.
                     this.user = userauth.registerUser(username, pass);
-                    LOGGER.info("[ClientHandler]\tUser " + username + " registered correctly.");
+                    LOGGER.log(Level.INFO, "[ClientHandler]\tUser {0} registered correctly.", username);
                 }
                 logged = true;
 
                 //If the credentiales don't match with login(), throws an exception and we catch here.
                 sendMessage("successful");
             } catch (LoginException e) {
-                Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, "Login error", e);
+                LOGGER.info("[ClientHandler]\tLogin error");
                 sendMessage("error");
             } catch (IOException ex) {
                 LOGGER.severe("[ClientHandler]\tFail to read the line from client");
+            } catch (UserBannedException e) {
+                LOGGER.info("[ClientHandler]\tUser is banned");
+                sendMessage("banned");
+                try {
+                    this.close();
+                } catch (ClientHandlerException ex) {
+                    LOGGER.severe("[ClientHandler]\tCould not close the connection");
+                }
             }
         } else {
             sendMessage("Please introduce \"login\" or \"register\".");
