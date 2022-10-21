@@ -22,6 +22,15 @@ public class UserAuth {
     }
 
 
+    /**
+     * Login an user
+     * 
+     * @param username
+     * @param password
+     * @return an user object
+     * @throws LoginException
+     * @throws UserBannedException 
+     */
     public User login (String username, String password) throws LoginException, UserBannedException {
         String hashedPassword = getSHA512(password);
 
@@ -42,6 +51,14 @@ public class UserAuth {
     }
 
 
+    /**
+     * Register a new user
+     * 
+     * @param username
+     * @param password
+     * @return an user object
+     * @throws LoginException 
+     */
     public User registerUser(String username, String password) throws LoginException {
         String hashedPassword = getSHA512(password);
 
@@ -60,7 +77,12 @@ public class UserAuth {
         return user;
     }
 
-
+/**
+ * Encrypt a string(password)
+ * 
+ * @param input
+ * @return the encrypted password
+ */
     public String getSHA512(String input){
         String toReturn = null;
         try {

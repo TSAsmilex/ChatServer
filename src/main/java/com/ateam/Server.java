@@ -272,12 +272,18 @@ public class Server {
         }
     }
 
+    /**
+     * filter a message comparing it with a badwords dictionary
+     * @param message
+     * @return the message filtered
+     */
     public String filterBadword(String message){
         String[] words = message.split("\\W+");
         String filteredMessage = "";
         for (String word : words) {
             int wordLenght = word.length();
             if(bw.getBadwordsList().contains(word.toLowerCase())){
+                
                 word=word.substring(0, 1);
                 for (int i = 1; i < wordLenght; i++) {
                     word+= "♥";

@@ -65,7 +65,11 @@ public class User {
         return this.username.hashCode() + this.hashedPassword.hashCode();
     }
     
-    public void substractLifes(){
+    /**
+     *Substract lives and ban the user if lives=0
+     * 
+     */
+    public void substractLives(){
         if (lives > 0) {            
             lives--;
         }  
