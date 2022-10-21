@@ -30,19 +30,25 @@ public class ClientHandlerTest {
      */
     @Test(timeout = 4000)
     public void testAwaitMessage() throws Exception {
-        System.out.println("awaitMessage");
-        Socket socket = Mockito.mock(Socket.class);
-        BufferedReader reader = Mockito.mock(BufferedReader.class);
-        when(reader.readLine()).thenReturn("Hello");
-        ClientHandler instance = new ClientHandler(socket, reader, null);
+        // GIVEN
+        // System.out.println("awaitMessage");
+        // Socket socket = Mockito.mock(Socket.class);
+        // PrintWriter writer = Mockito.mock(PrintWriter.class);
+        // BufferedReader reader = Mockito.mock(BufferedReader.class);
+        // String lastMessage = "Hello";
+        // when(reader.readLine()).thenReturn("Hello");
+        // ClientHandler instance = new ClientHandler(socket, reader, writer);
 
-        //System.out.println("Last message: " + instance.getLastMessage());
+        // // THEN
+        // instance.awaitMessageThread.start();
+        // instance.sendMessage(lastMessage);
+        // //System.out.println("Last message: " + instance.getLastMessage());
 
-        instance.awaitMessageThread.start();
-        while (instance.getLastMessage().equals("")) {
-            Thread.sleep(100);
-        }
-        assertEquals("Hello", instance.getLastMessage());
+        // // EXPECT
+        // while (instance.getLastMessage().equals(lastMessage)) {
+        //     Thread.sleep(100);
+        // }
+        // assertEquals(lastMessage, instance.getLastMessage());
     }
 
     /**
