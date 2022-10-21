@@ -92,5 +92,46 @@ public class ClientHandlerTest {
         assertEquals(expResult, result);
     }
 
-    
+
+    @Test
+    public void test_when_userHasSentManyMessages_thenTimeout() {
+        PrintWriter    testWriter = Mockito.mock(PrintWriter.class);
+        BufferedReader testReader = Mockito.mock(BufferedReader.class);
+        Socket         socket     = Mockito.mock(Socket.class);
+
+        ClientHandler ch = new ClientHandler(socket, testReader, testWriter);
+
+        String message = "TEST";
+
+        for (int i = 0; i < ch.getMaximumMessagesInQueue() + 1; i++) {
+            ch.sendMessage(message);
+        }
+
+        verify(testWriter, times(ch.getMaximumMessagesInQueue())).println(message);
+    }
+
+    @Test
+    public void testQueueClearsOldMessages() {
+        int seconds = 1;
+        String message = "TEST";
+
+        PrintWriter    testWriter = Mockito.mock(PrintWriter.class);
+        BufferedReader testReader = Mockito.mock(BufferedReader.class);
+        Socket         socket     = Mockito.mock(Socket.class);
+        ClientHandler  ch = Mockito.mock(ClientHandler.class);
+
+        when(ch.getTimeoutSeconds()).thenReturn(seconds);
+
+        ch.sendMessage(message);
+
+        try {
+            Thread.sleep(seconds + 100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ch.sendMessage(message);
+
+        assert(!ch.timedout());
+    }
 }

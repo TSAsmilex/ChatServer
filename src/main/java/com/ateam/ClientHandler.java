@@ -45,15 +45,14 @@ public class ClientHandler extends Thread {
     /**
      * The time frame in which the queue is keep tracked of.
      */
-    public static final int TIMEOUT_SECONDS           = 60;
-    public static final int MAXIMUM_MESSAGES_IN_QUEUE = 7;
+    private int timeoutSeconds         = 60;
+    private int maximumMessagesInQueue = 7;
 
     Runnable awaitMessage = () -> {
         LOGGER.info("[ClientHandler]\tAwaiting message");
 
         try {
             lastMessage = reader.readLine();
-            timespans.push(LocalTime.now());
             LOGGER.info("[ClientHandler]\tMessage received with size " + lastMessage.length() + ".");
         } catch (Exception e) {
             // e.printStackTrace();
@@ -154,6 +153,17 @@ public class ClientHandler extends Thread {
      *
      */
     public void sendMessage(String message) {
+        // Only take into account non commands.
+        if (Command.parseCommand(message) == Command.NOOP) {
+            timespans.push(LocalTime.now());
+        }
+
+        if (timedout()) {
+            LOGGER.info("[ClientHandler]\tThis client cannot send more messages since it's banned.");
+            return ;
+        }
+
+
         try {
             // Send response to client
             LOGGER.info("Sending message + \"" + message + "\" to client " + socket.getInetAddress() + ".");
@@ -162,7 +172,6 @@ public class ClientHandler extends Thread {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "[ClientHandler]\t PrintStream failed", e);
         }
-
     }
 
 
@@ -176,17 +185,35 @@ public class ClientHandler extends Thread {
     }
 
 
+    // ─── Timeouts ────────────────────────────────────────────────────────
+
+    public int getTimeoutSeconds() {
+        return timeoutSeconds;
+    }
+
+    public int getMaximumMessagesInQueue() {
+        return maximumMessagesInQueue;
+    }
+
     /**
-     * Track the number of messages the user is sending within a given timespan, determined by MAXIMU
+     * Track the number of messages the user is sending within a given timespan,
+     * determined by {@code MAXIMUM_MESSAGES_IN_QUEUE}.
      */
-    public boolean timeout() {
-        if (timespans.peek().plusSeconds(TIMEOUT_SECONDS).isBefore(LocalTime.now())) {
+    public boolean timedout() {
+        var timeoutSeconds = getTimeoutSeconds();
+        var maximumMessagesInQueue = getMaximumMessagesInQueue();
+
+        if (    timespans.size() > 0
+            &&  timespans.peek().plusSeconds(timeoutSeconds).isBefore(LocalTime.now()))
+        {
             timespans.poll();
-            LOGGER.info("[ClientHandler]\tUser has sent " + timespans.size() + " in the last " + TIMEOUT_SECONDS + " seconds.");
+            LOGGER.info("[ClientHandler]\tUser has sent " + timespans.size() + " in the last " + timeoutSeconds + " seconds.");
         }
 
-        return timespans.size() >= MAXIMUM_MESSAGES_IN_QUEUE;
+        return timespans.size() > maximumMessagesInQueue;
     }
+
+    // ─────────────────────────────────────────────────────────────────────
 
 
     /**
