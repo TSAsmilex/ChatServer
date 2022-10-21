@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.time.LocalTime;
 import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.security.auth.login.LoginException;
@@ -35,6 +37,17 @@ public class ClientHandler extends Thread {
     private UserAuth userauth;
     private User user;
 
+    /**
+     * Keeps track of the time since the last message was received.
+     * For any given element, <strong> if the arrival time exceeds the timeout limit </strong>, it will be removed
+     */
+    private Deque<LocalTime> timespans = new ArrayDeque<>();
+    /**
+     * The time frame in which the queue is keep tracked of.
+     */
+    private int timeoutSeconds         = 60;
+    private int maximumMessagesInQueue = 7;
+
     Runnable awaitMessage = () -> {
         LOGGER.info("[ClientHandler]\tAwaiting message");
 
@@ -46,26 +59,8 @@ public class ClientHandler extends Thread {
             LOGGER.info("[ClientHandler]\tClient has likely disconnected.");
         }
     };
-
-    public String peekLastMessage(){
-        return lastMessage.length() > 0 ? lastMessage : messages.peek();
-    }
-
-    public String getLastMessage(){
-        var msg = "";
-
-        if (lastMessage.length() > 0) {
-            msg = new String(lastMessage);
-            lastMessage = "";
-        }
-        else {
-            msg = messages.pop();
-        }
-
-        return msg;
-    }
-
     Thread awaitMessageThread = new Thread(awaitMessage, "Await message");
+
 
     /**
      * ClientHandler constructor
@@ -129,6 +124,27 @@ public class ClientHandler extends Thread {
         return newQueue;
     }
 
+
+    public String peekLastMessage(){
+        return lastMessage.length() > 0 ? lastMessage : messages.peek();
+    }
+
+
+    public String getLastMessage(){
+        var msg = "";
+
+        if (lastMessage.length() > 0) {
+            msg = new String(lastMessage);
+            lastMessage = "";
+        }
+        else {
+            msg = messages.pop();
+        }
+
+        return msg;
+    }
+
+
     /**
      * Send a message to the client
      *
@@ -137,6 +153,17 @@ public class ClientHandler extends Thread {
      *
      */
     public void sendMessage(String message) {
+        // Only take into account non commands.
+        if (Command.parseCommand(message) == Command.NOOP) {
+            timespans.push(LocalTime.now());
+        }
+
+        if (timedout()) {
+            LOGGER.info("[ClientHandler]\tThis client cannot send more messages since it's banned.");
+            return ;
+        }
+
+
         try {
             // Send response to client
             LOGGER.info("Sending message + \"" + message + "\" to client " + socket.getInetAddress() + ".");
@@ -145,8 +172,8 @@ public class ClientHandler extends Thread {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "[ClientHandler]\t PrintStream failed", e);
         }
-
     }
+
 
     /**
      * Check if there are pending messages
@@ -157,43 +184,37 @@ public class ClientHandler extends Thread {
         return !this.messages.isEmpty();
     }
 
-    /**
-     * Runnable method. Loops over and over, waiting for messages and responding to petitions.
-     */
-    @Override
-    public void run() {
-        // while the user isn't logged.
-        while (true) {
-            // The client might disconnect at any point. If that happens,
-            // we cut off the execution early.
-            if (!isConnected()) {
-                break;
-            }
 
-            if (!logged) {
-                setupAccount();
-            } //if the user is logged
-            else {
-                // If there are no messages pending => wake up a thread to await for a new one
-                if (lastMessage.isEmpty()) {
-                    if (!awaitMessageThread.isAlive()) {
-                        awaitMessageThread.start();
-                    }
-                } // New message received. Save it to the queue and clean it.
-                else {
-                    awaitMessageThread = new Thread(awaitMessage, "Await message");
-                    messages.add(new String(lastMessage));
-                    lastMessage = new String();
-                }
+    // ─── Timeouts ────────────────────────────────────────────────────────
 
-                try {
-                    Thread.sleep(200);
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "[ClientHandler]\tRun failed", e);
-                }
-            }
-        }
+    public int getTimeoutSeconds() {
+        return timeoutSeconds;
     }
+
+    public int getMaximumMessagesInQueue() {
+        return maximumMessagesInQueue;
+    }
+
+    /**
+     * Track the number of messages the user is sending within a given timespan,
+     * determined by {@code MAXIMUM_MESSAGES_IN_QUEUE}.
+     */
+    public boolean timedout() {
+        var timeoutSeconds = getTimeoutSeconds();
+        var maximumMessagesInQueue = getMaximumMessagesInQueue();
+
+        if (    timespans.size() > 0
+            &&  timespans.peek().plusSeconds(timeoutSeconds).isBefore(LocalTime.now()))
+        {
+            timespans.poll();
+            LOGGER.info("[ClientHandler]\tUser has sent " + timespans.size() + " in the last " + timeoutSeconds + " seconds.");
+        }
+
+        return timespans.size() > maximumMessagesInQueue;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+
 
     /**
      * Check if the client is connected and/or the socket has been closed.
@@ -211,7 +232,16 @@ public class ClientHandler extends Thread {
 
 
     /**
-     * close existing connection
+     * Get the username of the client
+     * @return the username
+     */
+    public String getUsername() {
+        return this.user == null? "" : this.user.getUsername();
+    }
+
+
+    /**
+     * Closes the existing connection
      *
      * @throws ClientHandlerException
      */
@@ -222,16 +252,6 @@ public class ClientHandler extends Thread {
             LOGGER.log(Level.SEVERE, "[ClientHandler]\t Error closing thread.", e);
         }
     }
-
-
-    /**
-     * Get the username of the client
-     * @return the username
-     */
-    public String getUsername() {
-        return this.user == null? "" : this.user.getUsername();
-    }
-
 
     /**
      * Handle the setup of the account, managing whether the user is already registered or not.
@@ -287,6 +307,45 @@ public class ClientHandler extends Thread {
             }
         } else {
             sendMessage("Please introduce \"login\" or \"register\".");
+        }
+    }
+
+
+    /**
+     * Runnable method. Loops over and over, waiting for messages and responding to petitions.
+     */
+    @Override
+    public void run() {
+        // while the user isn't logged.
+        while (true) {
+            // The client might disconnect at any point. If that happens,
+            // we cut off the execution early.
+            if (!isConnected()) {
+                break;
+            }
+
+            if (!logged) {
+                setupAccount();
+            } //if the user is logged
+            else {
+                // If there are no messages pending => wake up a thread to await for a new one
+                if (lastMessage.isEmpty()) {
+                    if (!awaitMessageThread.isAlive()) {
+                        awaitMessageThread.start();
+                    }
+                } // New message received. Save it to the queue and clean it.
+                else {
+                    awaitMessageThread = new Thread(awaitMessage, "Await message");
+                    messages.add(new String(lastMessage));
+                    lastMessage = new String();
+                }
+
+                try {
+                    Thread.sleep(200);
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "[ClientHandler]\tRun failed", e);
+                }
+            }
         }
     }
 }
