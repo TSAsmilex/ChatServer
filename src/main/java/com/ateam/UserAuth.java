@@ -29,15 +29,16 @@ public class UserAuth {
 
         try {
             user = userDB.login(username, hashedPassword);
+
+            if (user.isBanned()) {
+                throw new UserBannedException("User banned");
+            }
         }
         catch (LoginException e) {
             LOGGER.warning("[UserAuth]\tIncorrect user or/and password");
+            throw new LoginException("Incorrect user or/and password");
         }
-        
-        if (user.isBanned()) {
-            throw new UserBannedException("User banned");
-        }
-        
+
         return user;
     }
 

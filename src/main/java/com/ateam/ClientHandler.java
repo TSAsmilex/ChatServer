@@ -52,8 +52,15 @@ public class ClientHandler extends Thread {
         LOGGER.info("[ClientHandler]\tAwaiting message");
 
         try {
-            lastMessage = reader.readLine();
-            LOGGER.info("[ClientHandler]\tMessage received with size " + lastMessage.length() + ".");
+            var msg = reader.readLine();
+            LOGGER.info("[ClientHandler]\tMessage received with size " + msg.length() + ".");
+
+            // Only take into account non commands.
+            if (Command.parseCommand(msg) == Command.NOOP) {
+                this.timespans.add(LocalTime.now());
+            }
+
+            lastMessage = msg;
         } catch (Exception e) {
             // e.printStackTrace();
             LOGGER.info("[ClientHandler]\tClient has likely disconnected.");
@@ -153,20 +160,9 @@ public class ClientHandler extends Thread {
      *
      */
     public void sendMessage(String message) {
-        // Only take into account non commands.
-        if (Command.parseCommand(message) == Command.NOOP) {
-            timespans.push(LocalTime.now());
-        }
-
-        if (timedout()) {
-            LOGGER.info("[ClientHandler]\tThis client cannot send more messages since it's banned.");
-            return ;
-        }
-
-
         try {
             // Send response to client
-            LOGGER.info("Sending message + \"" + message + "\" to client " + socket.getInetAddress() + ".");
+            LOGGER.info("Sending message \"" + message + "\" to client " + socket.getInetAddress() + ".");
             writer.println(message);
             writer.flush();
         } catch (Exception e) {
@@ -200,13 +196,14 @@ public class ClientHandler extends Thread {
      * determined by {@code MAXIMUM_MESSAGES_IN_QUEUE}.
      */
     public boolean timedout() {
+        LOGGER.info("[ClientHandler]\tUser has sent " + timespans.size() + " in the last " + timeoutSeconds + " seconds.");
+
         var timeoutSeconds = getTimeoutSeconds();
         var maximumMessagesInQueue = getMaximumMessagesInQueue();
 
         if (timespans.size() > 0) {
             while (timespans.peek().plusSeconds(timeoutSeconds).isBefore(LocalTime.now())) {
                 timespans.poll();
-                LOGGER.info("[ClientHandler]\tUser has sent " + timespans.size() + " in the last " + timeoutSeconds + " seconds.");
             }
         }
 
@@ -237,6 +234,11 @@ public class ClientHandler extends Thread {
      */
     public String getUsername() {
         return this.user == null? "" : this.user.getUsername();
+    }
+
+
+    public void warnBadWord() {
+        user.substractLives();
     }
 
 
@@ -341,7 +343,7 @@ public class ClientHandler extends Thread {
                 }
 
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(50);
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "[ClientHandler]\tRun failed", e);
                 }

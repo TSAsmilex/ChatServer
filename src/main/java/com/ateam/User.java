@@ -15,18 +15,18 @@ public class User {
     public User (String username, String hashedPassword) {
         this.username       = username;
         this.hashedPassword = hashedPassword;
-        
+
     }
-    
+
         public User (String username, String hashedPassword, int lives) {
         this.username       = username;
         this.hashedPassword = hashedPassword;
         this.lives          = Math.max(0, lives);
-        
+
         if (lives <= 0) {
             banned = true;
         }
-        
+
     }
 
 
@@ -47,8 +47,8 @@ public class User {
         return banned;
     }
 
-    
-    
+
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -64,21 +64,15 @@ public class User {
     public int hashCode() {
         return this.username.hashCode() + this.hashedPassword.hashCode();
     }
-    
-    public void substractLifes(){
-        if (lives > 0) {            
+
+    public void substractLives(){
+        if (lives > 0) {
             lives--;
-        }  
-        
+        }
+
         if (lives == 0 ) {
             banned = true;
         }
     }
-   
-}
-    
-    
-    
-    
-    
 
+}

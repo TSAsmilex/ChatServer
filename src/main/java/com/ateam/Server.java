@@ -134,13 +134,19 @@ public class Server {
      * @throws com.ateam.ClientHandlerException
      */
     public void broadcast(ClientHandler client) throws ClientHandlerException {
+        if (client.timedout()) {
+            client.sendMessage("Please don't send messages too quickly.");
+            client.getMessages();
+            return ;
+        }
+
         LOGGER.info("[Server]\t Broadcasting messages");
 
         var messages = client.getMessages();
         var room = getRoom(client);
 
         while (!messages.isEmpty()) {
-            var message = filterBadword(messages.pop());
+            var message = filterBadword(messages.pop(), client);
 
             List<ClientHandler> otherClients = room.getUsers().stream()
                 .filter(c -> c != client)
@@ -272,16 +278,21 @@ public class Server {
         }
     }
 
-    public String filterBadword(String message){
+    public String filterBadword(String message, ClientHandler client){
         String[] words = message.split("\\W+");
         String filteredMessage = "";
+
         for (String word : words) {
             int wordLenght = word.length();
-            if(bw.getBadwordsList().contains(word.toLowerCase())){
-                word=word.substring(0, 1);
+
+            if (bw.getBadwordsList().contains(word.toLowerCase())){
+                word = word.substring(0, 1);
+
                 for (int i = 1; i < wordLenght; i++) {
-                    word+= "♥";
+                    word += "♥";
                 }
+
+                client.warnBadWord();
             }
             filteredMessage += word + " ";
         }
