@@ -203,11 +203,11 @@ public class ClientHandler extends Thread {
         var timeoutSeconds = getTimeoutSeconds();
         var maximumMessagesInQueue = getMaximumMessagesInQueue();
 
-        if (    timespans.size() > 0
-            &&  timespans.peek().plusSeconds(timeoutSeconds).isBefore(LocalTime.now()))
-        {
-            timespans.poll();
-            LOGGER.info("[ClientHandler]\tUser has sent " + timespans.size() + " in the last " + timeoutSeconds + " seconds.");
+        if (timespans.size() > 0) {
+            while (timespans.peek().plusSeconds(timeoutSeconds).isBefore(LocalTime.now())) {
+                timespans.poll();
+                LOGGER.info("[ClientHandler]\tUser has sent " + timespans.size() + " in the last " + timeoutSeconds + " seconds.");
+            }
         }
 
         return timespans.size() > maximumMessagesInQueue;
