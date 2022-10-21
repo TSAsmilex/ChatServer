@@ -42,7 +42,7 @@ public class UserAuth {
     }
 
 
-    public User registiferUser(String username, String password) throws LoginException {
+    public User registerUser(String username, String password) throws LoginException {
         String hashedPassword = getSHA512(password);
 
         User user = new User(username, hashedPassword);
@@ -73,9 +73,5 @@ public class UserAuth {
         }
 
         return toReturn;
-    }
-
-    User registerUser(String username, String pass) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
