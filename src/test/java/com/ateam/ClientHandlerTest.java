@@ -35,14 +35,13 @@ public class ClientHandlerTest {
         BufferedReader reader = Mockito.mock(BufferedReader.class);
         when(reader.readLine()).thenReturn("Hello");
         ClientHandler instance = new ClientHandler(socket, reader, null);
+
         //System.out.println("Last message: " + instance.getLastMessage());
 
         instance.awaitMessageThread.start();
-
         while (instance.getLastMessage().equals("")) {
             Thread.sleep(100);
         }
-
         assertEquals("Hello", instance.getLastMessage());
     }
 
@@ -56,15 +55,11 @@ public class ClientHandlerTest {
         PrintWriter testWriter = Mockito.mock(PrintWriter.class);
         BufferedReader testReader = Mockito.mock(BufferedReader.class);
         Socket socket = Mockito.mock(Socket.class);
-
         InetAddress addr = InetAddress.getByName("127.0.0.1");
         when(socket.getInetAddress()).thenReturn(addr);
-
         ClientHandler instance = new ClientHandler(socket, testReader, testWriter);
-
         // THEN
         instance.sendMessage("Hola mundo");
-
         // EXPECT
         verify(testWriter, times(1)).println("Hola mundo");
         verify(testReader, times(0)).readLine();
