@@ -302,11 +302,6 @@ public class ClientHandler extends Thread {
             } catch (UserBannedException e) {
                 LOGGER.info("[ClientHandler]\tUser is banned");
                 sendMessage("banned");
-                try {
-                    this.close();
-                } catch (ClientHandlerException ex) {
-                    LOGGER.severe("[ClientHandler]\tCould not close the connection");
-                }
             }
         } else {
             sendMessage("Please introduce \"login\" or \"register\".");
